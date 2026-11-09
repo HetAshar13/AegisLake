@@ -49,8 +49,7 @@ AegisLake follows the **Medallion Lakehouse Pattern** enhanced with **Change Dat
 ### Silver Tier: Watermarked Deduplication & Currency Scaling
 - **Streaming Deduplication:** PySpark Structured Streaming applies a 10-minute event-time watermark:
   ```python
-  df.withWatermark("event_timestamp", "10 minutes") \
-    .dropDuplicates(["authorization_id", "merchant_id"])
+  df.withWatermark("event_timestamp", "10 minutes").dropDuplicates(["authorization_id", "merchant_id"])
   ```
 - **Dual-Path Routing:** Corrupted records violating schema invariants are diverted to an isolated Dead-Letter Queue (`data/delta/quarantine`), preventing downstream poisoning.
 - **Change Data Feed (CDF):** Enabled on Silver tables (`spark.databricks.delta.changeDataFeed.enabled = true`), exposing net row mutations (`insert`, `update_preimage`, `update_postimage`, `delete`) to dbt without full table scans.

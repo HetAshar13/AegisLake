@@ -1,5 +1,4 @@
-"""Unit & Integration Tests for AegisLake Streaming Engine and Data Contracts.
-"""
+"""Unit & Integration Tests for AegisLake Streaming Engine and Data Contracts."""
 
 import pytest
 from pydantic import ValidationError
@@ -85,7 +84,7 @@ class TestPaymentProducer:
     def test_producer_generates_valid_events(self):
         producer = PaymentStreamProducer(customer_pool_size=10, seed=42)
         auth = producer.generate_authorization()
-        
+
         assert auth.authorization_id.startswith("auth_")
         assert auth.idempotency_key.startswith("idem_")
         assert auth.amount_minor > 0

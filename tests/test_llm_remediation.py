@@ -15,7 +15,7 @@ def test_llm_remediation_fallback_when_no_token():
             root_cause_table="stg_silver_authorizations",
             root_cause_column="raw_amount",
             expression="raw_amount * 100",
-            break_payload={"authorization_id": "AUTH_004", "discrepancy_amount_scaled": -65.0}
+            break_payload={"authorization_id": "AUTH_004", "discrepancy_amount_scaled": -65.0},
         )
 
         assert result["provider"] == "deterministic_fallback"
@@ -41,7 +41,7 @@ def test_llm_remediation_success_with_gemini(mock_gemini_client_cls):
             expression="auth_amount_minor / 100",
             break_payload={"authorization_id": "AUTH_004", "discrepancy_amount_scaled": -65.0},
             provider="gemini",
-            model_name="gemini-2.5-flash"
+            model_name="gemini-2.5-flash",
         )
 
         assert result["provider"] == "gemini"
@@ -73,7 +73,7 @@ def test_llm_remediation_success_with_hf_qwen(mock_inference_client_cls):
             expression="auth_amount_minor / 100",
             break_payload={"authorization_id": "AUTH_004", "discrepancy_amount_scaled": -65.0},
             provider="huggingface",
-            model_name="Qwen/Qwen2.5-Coder-32B-Instruct"
+            model_name="Qwen/Qwen2.5-Coder-32B-Instruct",
         )
 
         assert result["provider"] == "huggingface"

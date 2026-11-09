@@ -82,4 +82,4 @@ def optimize_and_compact_table(
     # delta_table = DeltaTable.forPath(spark, table_path)
     # return delta_table.optimize().executeZOrderBy(zorder_col)
     delta_table = DeltaTable.forPath(spark, table_path)
-    return delta_table.optimize().executeZOrderBy(zorder_col)   
+    return delta_table.optimize().executeZOrderBy(zorder_col)

@@ -36,26 +36,27 @@ def get_card_authorization_bronze_schema() -> StructType:
     # 10. "status": StringType()
     # 11. "authorized_at": StringType()
     # 12. "merchant_mcc": StringType()
-    return StructType([
-        StructField("event_id", StringType(), nullable=True),
-        StructField("authorization_id", StringType(), nullable=True),
-        StructField("idempotency_key", StringType(), nullable=True),
-        StructField("customer_id", StringType(), nullable=True),
-        StructField("merchant_id", StringType(), nullable=True),
-        StructField("payment_rail", StringType(), nullable=True),
-        StructField("amount_minor", LongType(), nullable=True),
-        StructField("currency", StringType(), nullable=True),
-        StructField("card_last4", StringType(), nullable=True),
-        StructField("status", StringType(), nullable=True),
-        StructField("authorized_at", StringType(), nullable=True),
-        StructField("merchant_mcc", StringType(), nullable=True)
-    ])
-   
+    return StructType(
+        [
+            StructField("event_id", StringType(), nullable=True),
+            StructField("authorization_id", StringType(), nullable=True),
+            StructField("idempotency_key", StringType(), nullable=True),
+            StructField("customer_id", StringType(), nullable=True),
+            StructField("merchant_id", StringType(), nullable=True),
+            StructField("payment_rail", StringType(), nullable=True),
+            StructField("amount_minor", LongType(), nullable=True),
+            StructField("currency", StringType(), nullable=True),
+            StructField("card_last4", StringType(), nullable=True),
+            StructField("status", StringType(), nullable=True),
+            StructField("authorized_at", StringType(), nullable=True),
+            StructField("merchant_mcc", StringType(), nullable=True),
+        ]
+    )
 
 
 def ingest_raw_events_to_bronze(
     spark: SparkSession,
-    source_dir: str,    
+    source_dir: str,
     checkpoint_dir: str,
     target_delta_dir: str,
     available_now: bool = True,
@@ -100,14 +101,9 @@ def ingest_raw_events_to_bronze(
     # 8. Return `query`
     schema = get_card_authorization_bronze_schema()
     raw_stream = spark.readStream.schema(schema).json(source_dir)
-    bronze_df = (raw_stream
-        .withColumn("ingested_at", current_timestamp())
-        .withColumn("source_file", input_file_name()))
+    bronze_df = raw_stream.withColumn("ingested_at", current_timestamp()).withColumn("source_file", input_file_name())
 
-    writer = (bronze_df.writeStream
-        .format("delta")
-        .outputMode("append")
-        .option("checkpointLocation", checkpoint_dir))
+    writer = bronze_df.writeStream.format("delta").outputMode("append").option("checkpointLocation", checkpoint_dir)
 
     if available_now:
         writer = writer.trigger(availableNow=True)
@@ -115,5 +111,5 @@ def ingest_raw_events_to_bronze(
 
     if available_now:
         query.awaitTermination()
-        
+
     return query

@@ -19,7 +19,7 @@ class ChaosEngine:
     @staticmethod
     def inject_jpy_decimal_anomaly(auth: CardAuthorizationEvent) -> Dict[str, Any]:
         """Corrupts JPY amounts by erroneously dividing by 100 or scaling as EUR cents.
-        
+
         This mimics a junior engineer treating all currencies as having 2 decimal places.
         """
         payload = auth.model_dump()
@@ -82,7 +82,7 @@ class ChaosEngine:
         base_payload = auth.model_dump()
         for i in range(duplicate_count):
             dup = copy.deepcopy(base_payload)
-            dup["_chaos_tag"] = f"ERR_DUPLICATE_STORM_REPLAY_{i+1}"
+            dup["_chaos_tag"] = f"ERR_DUPLICATE_STORM_REPLAY_{i + 1}"
             duplicates.append(dup)
         return duplicates
 

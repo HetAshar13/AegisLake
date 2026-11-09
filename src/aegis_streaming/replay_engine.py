@@ -23,8 +23,8 @@ MERCHANT_DISTRIBUTION = [
 CURRENCY_WEIGHTS = [
     ("EUR", 2, 70),  # 70% EUR (2 decimals)
     ("USD", 2, 20),  # 20% USD (2 decimals)
-    ("GBP", 2, 8),   # 8% GBP (2 decimals)
-    ("JPY", 0, 2),   # 2% JPY (0 decimals)
+    ("GBP", 2, 8),  # 8% GBP (2 decimals)
+    ("JPY", 0, 2),  # 2% JPY (0 decimals)
 ]
 
 
@@ -53,21 +53,15 @@ def sample_realistic_transaction(transaction_seq: int = 1) -> Dict[str, Any]:
     Generates a single high-fidelity transaction dictionary modeled on real-world retail banking distributions.
     """
     # 1. Weighted random selection of merchant category
-    merchant = random.choices(
-        MERCHANT_DISTRIBUTION,
-        weights=[m["weight"] for m in MERCHANT_DISTRIBUTION]
-    )[0]
+    merchant = random.choices(MERCHANT_DISTRIBUTION, weights=[m["weight"] for m in MERCHANT_DISTRIBUTION])[0]
 
     # 2. Weighted random selection of currency
-    curr_tuple = random.choices(
-        CURRENCY_WEIGHTS,
-        weights=[c[2] for c in CURRENCY_WEIGHTS]
-    )[0]
+    curr_tuple = random.choices(CURRENCY_WEIGHTS, weights=[c[2] for c in CURRENCY_WEIGHTS])[0]
     currency_code, exponent, _ = curr_tuple
 
     # 3. Sample amount from merchant's typical range
     amount = random.uniform(*merchant["amount_range"])
-    amount_minor = int(round(amount * (10 ** exponent)))
+    amount_minor = int(round(amount * (10**exponent)))
     amount_scaled = round(amount, 2 if exponent > 0 else 0)
 
     # 4. Construct realistic transaction payload
@@ -87,9 +81,7 @@ def sample_realistic_transaction(transaction_seq: int = 1) -> Dict[str, Any]:
 
 
 def stream_realistic_transactions(
-    total_events: int = 10,
-    lambda_rate: float = 15.0,
-    simulate_sleep: bool = False
+    total_events: int = 10, lambda_rate: float = 15.0, simulate_sleep: bool = False
 ) -> Generator[Dict[str, Any], None, None]:
     """
     Yields realistic transactions with Poisson inter-arrival delays.

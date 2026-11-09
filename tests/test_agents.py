@@ -11,6 +11,7 @@ from typing import get_type_hints
 def test_state_schema_imports():
     """Verify that IncidentState and merge_dicts can be imported cleanly."""
     from aegis_agent.state import IncidentState, merge_dicts
+
     assert IncidentState is not None
     assert callable(merge_dicts)
 
@@ -50,9 +51,7 @@ def test_incident_state_instantiation():
         "affected_assets": ["fact_reconciliation_breaks", "silver_authorizations"],
         "quarantine_status": True,
         "human_approval_status": "PENDING",
-        "audit_trail": [
-            {"step": "triage", "action": "flagged_critical", "timestamp": "2026-11-07T12:00:01Z"}
-        ],
+        "audit_trail": [{"step": "triage", "action": "flagged_critical", "timestamp": "2026-11-07T12:00:01Z"}],
         "error_state": {},
         "retry_count": 0,
     }
@@ -71,19 +70,39 @@ def test_incident_state_required_fields_present():
 
     expected_fields = [
         # Metadata
-        "incident_id", "rail_source", "timestamp", "severity",
+        "incident_id",
+        "rail_source",
+        "timestamp",
+        "severity",
         # Break & Triage
-        "break_payload", "triage_classification", "financial_impact_usd", "affected_assets",
+        "break_payload",
+        "triage_classification",
+        "financial_impact_usd",
+        "affected_assets",
         # Forensic
-        "quarantine_status", "quarantine_table_ref", "forensic_inspection_results",
+        "quarantine_status",
+        "quarantine_table_ref",
+        "forensic_inspection_results",
         # AST Lineage
-        "ast_lineage_graph", "impacted_downstream_pipelines", "root_cause_column", "root_cause_table",
+        "ast_lineage_graph",
+        "impacted_downstream_pipelines",
+        "root_cause_column",
+        "root_cause_table",
         # Remediation
-        "proposed_patch", "patch_rationale", "patch_validation_results", "dry_run_success",
+        "proposed_patch",
+        "patch_rationale",
+        "patch_validation_results",
+        "dry_run_success",
         # HITL & Compliance
-        "human_reviewer_id", "human_approval_status", "compliance_audit_logged", "compliance_signoff_id",
+        "human_reviewer_id",
+        "human_approval_status",
+        "compliance_audit_logged",
+        "compliance_signoff_id",
         # Reducer / Message fields
-        "messages", "audit_trail", "error_state", "retry_count",
+        "messages",
+        "audit_trail",
+        "error_state",
+        "retry_count",
     ]
 
     missing_fields = [f for f in expected_fields if f not in annotations]
@@ -93,6 +112,7 @@ def test_incident_state_required_fields_present():
 # =====================================================================
 # Step 4.2 Tests: Deterministic SQLglot AST Lineage Tool
 # =====================================================================
+
 
 def test_extract_column_lineage_ctes_and_scaling():
     """Verify AST lineage tracing across CTEs, column expressions, and table joins."""
@@ -121,19 +141,13 @@ def test_extract_column_lineage_ctes_and_scaling():
         "stg_silver_authorizations": {
             "transaction_id": "varchar",
             "raw_amount": "decimal",
-            "counterparty_id": "varchar"
+            "counterparty_id": "varchar",
         },
-        "dim_currencies": {
-            "id": "varchar",
-            "currency_code": "varchar"
-        }
+        "dim_currencies": {"id": "varchar", "currency_code": "varchar"},
     }
 
     result = extract_column_lineage(
-        sql_query=dbt_sql,
-        target_column="discrepancy_amount_scaled",
-        dialect="duckdb",
-        schema=schema_map
+        sql_query=dbt_sql, target_column="discrepancy_amount_scaled", dialect="duckdb", schema=schema_map
     )
 
     assert result["status"] == "SUCCESS"
@@ -148,11 +162,7 @@ def test_extract_column_lineage_failure_handling():
     from aegis_agent.tools.lineage_parser import extract_column_lineage
 
     invalid_sql = "SELECT FROM WHERE;"
-    result = extract_column_lineage(
-        sql_query=invalid_sql,
-        target_column="non_existent_col",
-        dialect="duckdb"
-    )
+    result = extract_column_lineage(sql_query=invalid_sql, target_column="non_existent_col", dialect="duckdb")
 
     assert result["status"] == "FAILED"
     assert "error_message" in result
@@ -161,6 +171,7 @@ def test_extract_column_lineage_failure_handling():
 # =====================================================================
 # Step 4.3 Tests: Forensic Inspector Tool
 # =====================================================================
+
 
 def test_fetch_worst_reconciliation_break_live():
     """Verify querying real break records from DuckDB lakehouse mart."""
@@ -196,6 +207,7 @@ def test_fetch_break_forensics_not_found():
 # =====================================================================
 # Step 4.4 Tests: Multi-Agent StateGraph & HITL Gate
 # =====================================================================
+
 
 def test_build_incident_commander_graph():
     """Verify graph compiles cleanly with MemorySaver checkpointer."""
@@ -282,6 +294,3 @@ def test_graph_execution_hitl_rejection():
     final_snapshot = graph.get_state(config)
     assert final_snapshot.values["human_approval_status"] == "REJECTED"
     assert final_snapshot.values["compliance_audit_logged"] is False
-
-
-

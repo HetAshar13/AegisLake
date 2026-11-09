@@ -27,105 +27,121 @@ def main():
     for i in range(100):
         auth, settle = producer.generate_pair(settlement_delay_sec=30)
 
-        auth_rows.append({
-            "authorization_id": auth.authorization_id,
-            "idempotency_key": auth.idempotency_key,
-            "customer_id": auth.customer_id,
-            "merchant_id": auth.merchant_id,
-            "merchant_mcc": auth.merchant_mcc,
-            "amount_minor": int(auth.amount_minor),
-            "currency": auth.currency,
-            "card_last4": auth.card_last4,
-            "status": auth.status.value,
-            "authorized_at": auth.authorized_at.strftime("%Y-%m-%d %H:%M:%S"),
-        })
+        auth_rows.append(
+            {
+                "authorization_id": auth.authorization_id,
+                "idempotency_key": auth.idempotency_key,
+                "customer_id": auth.customer_id,
+                "merchant_id": auth.merchant_id,
+                "merchant_mcc": auth.merchant_mcc,
+                "amount_minor": int(auth.amount_minor),
+                "currency": auth.currency,
+                "card_last4": auth.card_last4,
+                "status": auth.status.value,
+                "authorized_at": auth.authorized_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        )
 
         if i % 12 == 0:
             # Amount Mismatch Break (e.g. restaurant tip or FX variance)
             settle_dict = ChaosEngine.inject_settlement_break(auth, mismatch_delta_minor=750)
-            settle_rows.append({
-                "settlement_id": settle_dict["settlement_id"],
-                "authorization_id": settle_dict["authorization_id"],
-                "clearinghouse": settle_dict["clearinghouse"],
-                "settled_amount_minor": int(settle_dict["settled_amount_minor"]),
-                "fee_minor": int(settle_dict["fee_minor"]),
-                "settled_currency": settle_dict["currency"],
-                "settlement_status": settle_dict["settlement_status"],
-                "batch_id": settle_dict["batch_id"],
-                "settled_at": str(settle_dict["settled_at"])[:19],
-            })
-            ledger_rows.append({
-                "ledger_entry_id": f"led_{i:04d}",
-                "authorization_id": settle_dict["authorization_id"],
-                "account_id": "ACC_GL_1001",
-                "ledger_amount_minor": int(settle_dict["settled_amount_minor"]),
-                "currency": settle_dict["currency"],
-                "entry_type": "DEBIT",
-                "posted_at": str(settle_dict["settled_at"])[:19],
-            })
+            settle_rows.append(
+                {
+                    "settlement_id": settle_dict["settlement_id"],
+                    "authorization_id": settle_dict["authorization_id"],
+                    "clearinghouse": settle_dict["clearinghouse"],
+                    "settled_amount_minor": int(settle_dict["settled_amount_minor"]),
+                    "fee_minor": int(settle_dict["fee_minor"]),
+                    "settled_currency": settle_dict["currency"],
+                    "settlement_status": settle_dict["settlement_status"],
+                    "batch_id": settle_dict["batch_id"],
+                    "settled_at": str(settle_dict["settled_at"])[:19],
+                }
+            )
+            ledger_rows.append(
+                {
+                    "ledger_entry_id": f"led_{i:04d}",
+                    "authorization_id": settle_dict["authorization_id"],
+                    "account_id": "ACC_GL_1001",
+                    "ledger_amount_minor": int(settle_dict["settled_amount_minor"]),
+                    "currency": settle_dict["currency"],
+                    "entry_type": "DEBIT",
+                    "posted_at": str(settle_dict["settled_at"])[:19],
+                }
+            )
         elif i % 15 == 0:
             # Unmatched Authorization (settlement never arrives)
             pass
         elif i % 20 == 0:
             # Currency Mismatch Break
-            settle_rows.append({
-                "settlement_id": settle.settlement_id,
-                "authorization_id": auth.authorization_id,
-                "clearinghouse": settle.clearinghouse,
-                "settled_amount_minor": int(settle.settled_amount_minor),
-                "fee_minor": int(settle.fee_minor),
-                "settled_currency": "USD" if auth.currency == "EUR" else "EUR",
-                "settlement_status": settle.settlement_status.value,
-                "batch_id": settle.batch_id,
-                "settled_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
-            })
-            ledger_rows.append({
-                "ledger_entry_id": f"led_{i:04d}",
-                "authorization_id": auth.authorization_id,
-                "account_id": "ACC_GL_1001",
-                "ledger_amount_minor": int(settle.settled_amount_minor),
-                "currency": settle.currency,
-                "entry_type": "DEBIT",
-                "posted_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
-            })
+            settle_rows.append(
+                {
+                    "settlement_id": settle.settlement_id,
+                    "authorization_id": auth.authorization_id,
+                    "clearinghouse": settle.clearinghouse,
+                    "settled_amount_minor": int(settle.settled_amount_minor),
+                    "fee_minor": int(settle.fee_minor),
+                    "settled_currency": "USD" if auth.currency == "EUR" else "EUR",
+                    "settlement_status": settle.settlement_status.value,
+                    "batch_id": settle.batch_id,
+                    "settled_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
+            ledger_rows.append(
+                {
+                    "ledger_entry_id": f"led_{i:04d}",
+                    "authorization_id": auth.authorization_id,
+                    "account_id": "ACC_GL_1001",
+                    "ledger_amount_minor": int(settle.settled_amount_minor),
+                    "currency": settle.currency,
+                    "entry_type": "DEBIT",
+                    "posted_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
         else:
             # Clean Matched Transaction
-            settle_rows.append({
-                "settlement_id": settle.settlement_id,
-                "authorization_id": settle.authorization_id,
-                "clearinghouse": settle.clearinghouse,
-                "settled_amount_minor": int(settle.settled_amount_minor),
-                "fee_minor": int(settle.fee_minor),
-                "settled_currency": settle.currency,
-                "settlement_status": settle.settlement_status.value,
-                "batch_id": settle.batch_id,
-                "settled_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
-            })
-            ledger_rows.append({
-                "ledger_entry_id": f"led_{i:04d}",
-                "authorization_id": settle.authorization_id,
-                "account_id": "ACC_GL_1001",
-                "ledger_amount_minor": int(settle.settled_amount_minor),
-                "currency": settle.currency,
-                "entry_type": "DEBIT",
-                "posted_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
-            })
+            settle_rows.append(
+                {
+                    "settlement_id": settle.settlement_id,
+                    "authorization_id": settle.authorization_id,
+                    "clearinghouse": settle.clearinghouse,
+                    "settled_amount_minor": int(settle.settled_amount_minor),
+                    "fee_minor": int(settle.fee_minor),
+                    "settled_currency": settle.currency,
+                    "settlement_status": settle.settlement_status.value,
+                    "batch_id": settle.batch_id,
+                    "settled_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
+            ledger_rows.append(
+                {
+                    "ledger_entry_id": f"led_{i:04d}",
+                    "authorization_id": settle.authorization_id,
+                    "account_id": "ACC_GL_1001",
+                    "ledger_amount_minor": int(settle.settled_amount_minor),
+                    "currency": settle.currency,
+                    "entry_type": "DEBIT",
+                    "posted_at": settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
 
     # Add 5 phantom settlements
     for j in range(5):
         phantom_auth = producer.generate_authorization()
         phantom_settle = producer.generate_settlement_for_auth(phantom_auth)
-        settle_rows.append({
-            "settlement_id": phantom_settle.settlement_id,
-            "authorization_id": f"phantom_auth_{j:03d}",
-            "clearinghouse": phantom_settle.clearinghouse,
-            "settled_amount_minor": int(phantom_settle.settled_amount_minor),
-            "fee_minor": int(phantom_settle.fee_minor),
-            "settled_currency": phantom_settle.currency,
-            "settlement_status": phantom_settle.settlement_status.value,
-            "batch_id": phantom_settle.batch_id,
-            "settled_at": phantom_settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
-        })
+        settle_rows.append(
+            {
+                "settlement_id": phantom_settle.settlement_id,
+                "authorization_id": f"phantom_auth_{j:03d}",
+                "clearinghouse": phantom_settle.clearinghouse,
+                "settled_amount_minor": int(phantom_settle.settled_amount_minor),
+                "fee_minor": int(phantom_settle.fee_minor),
+                "settled_currency": phantom_settle.currency,
+                "settlement_status": phantom_settle.settlement_status.value,
+                "batch_id": phantom_settle.batch_id,
+                "settled_at": phantom_settle.settled_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        )
 
     staging_dir = Path("data/staging_raw")
     staging_dir.mkdir(parents=True, exist_ok=True)

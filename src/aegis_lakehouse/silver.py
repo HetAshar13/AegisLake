@@ -50,7 +50,7 @@ def parse_and_validate_authorizations(df: DataFrame) -> DataFrame:
     # 3. Add the 'is_valid' boolean column:
     #    return with_ts.withColumn("is_valid", valid_condition)
     with_ts = df.withColumn("authorized_at_ts", F.to_timestamp(F.col("authorized_at")))
-    
+
     valid_condition = (
         (F.col("amount_minor") > 0)
         & (F.col("currency").isin(SUPPORTED_CURRENCIES))
@@ -101,7 +101,7 @@ def route_clean_and_quarantine(validated_df: DataFrame) -> Tuple[DataFrame, Data
         .withColumn("quarantine_reason", F.lit("FAILED_FINANCIAL_INVARIANT"))
         .drop("authorized_at_ts", "is_valid")
     )
-    return clean_df, quarantine_df  
+    return clean_df, quarantine_df
 
 
 def apply_watermarked_deduplication(
@@ -123,8 +123,4 @@ def apply_watermarked_deduplication(
     #     .withWatermark(watermark_col, watermark_delay)
     #     .dropDuplicates(list(dedup_cols))
     # )
-    return (
-        clean_df
-        .withWatermark(watermark_col, watermark_delay)
-        .dropDuplicates(list(dedup_cols))
-    )
+    return clean_df.withWatermark(watermark_col, watermark_delay).dropDuplicates(list(dedup_cols))

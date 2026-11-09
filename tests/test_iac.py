@@ -36,20 +36,20 @@ class TestTerraformLakehouseArchitecture:
     def test_kms_cmk_key_rotation_enabled(self):
         """Asserts customer-managed KMS key mandates automatic 365-day rotation (SOX/DORA requirement)."""
         s3_main = (TERRAFORM_DIR / "modules" / "s3_lakehouse" / "main.tf").read_text(encoding="utf-8")
-        assert "resource \"aws_kms_key\"" in s3_main
+        assert 'resource "aws_kms_key"' in s3_main
         assert "enable_key_rotation     = true" in s3_main or "enable_key_rotation = true" in s3_main
         assert "deletion_window_in_days = 30" in s3_main
 
     def test_s3_bucket_owner_enforced(self):
         """Asserts legacy S3 ACLs are completely disabled via BucketOwnerEnforced."""
         s3_main = (TERRAFORM_DIR / "modules" / "s3_lakehouse" / "main.tf").read_text(encoding="utf-8")
-        assert "resource \"aws_s3_bucket_ownership_controls\"" in s3_main
+        assert 'resource "aws_s3_bucket_ownership_controls"' in s3_main
         assert 'object_ownership = "BucketOwnerEnforced"' in s3_main
 
     def test_s3_complete_public_access_block(self):
         """Asserts all four S3 public access block vectors are strictly enforced."""
         s3_main = (TERRAFORM_DIR / "modules" / "s3_lakehouse" / "main.tf").read_text(encoding="utf-8")
-        assert "resource \"aws_s3_bucket_public_access_block\"" in s3_main
+        assert 'resource "aws_s3_bucket_public_access_block"' in s3_main
         for flag in ["block_public_acls", "block_public_policy", "ignore_public_acls", "restrict_public_buckets"]:
             match = re.search(rf"{flag}\s*=\s*true", s3_main)
             assert match, f"Public access block missing or not set to true: {flag}"
@@ -57,7 +57,7 @@ class TestTerraformLakehouseArchitecture:
     def test_s3_server_side_kms_encryption(self):
         """Asserts S3 bucket applies SSE-KMS with customer key by default."""
         s3_main = (TERRAFORM_DIR / "modules" / "s3_lakehouse" / "main.tf").read_text(encoding="utf-8")
-        assert "resource \"aws_s3_bucket_server_side_encryption_configuration\"" in s3_main
+        assert 'resource "aws_s3_bucket_server_side_encryption_configuration"' in s3_main
         assert 'sse_algorithm     = "aws:kms"' in s3_main or 'sse_algorithm = "aws:kms"' in s3_main
         assert "bucket_key_enabled = true" in s3_main
 
@@ -70,7 +70,7 @@ class TestTerraformLakehouseArchitecture:
     def test_iam_least_privilege_scoping(self):
         """Asserts IAM policy does not use dangerous wildcards and strictly scopes access to Medallion prefixes."""
         iam_main = (TERRAFORM_DIR / "modules" / "iam" / "main.tf").read_text(encoding="utf-8")
-        
+
         # Deny wildcard s3 on all resources
         assert '"s3:*"' not in iam_main, "Security violation: Wildcard s3:* detected in IAM policy"
         assert 'resources = ["*"]' not in iam_main, "Security violation: Global wildcard resource detected"

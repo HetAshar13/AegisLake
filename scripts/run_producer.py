@@ -43,7 +43,9 @@ def run_simulation(tps: int = 5, total_events: int = 50, chaos_rate: float = 0.1
     producer = PaymentStreamProducer(customer_pool_size=100)
     terminal_width = shutil.get_terminal_size((80, 24)).columns
 
-    console.print(f"[bold green]Starting AegisLake Payment Streaming Simulator[/bold green] (TPS: {tps}, Events: {total_events})")
+    console.print(
+        f"[bold green]Starting AegisLake Payment Streaming Simulator[/bold green] (TPS: {tps}, Events: {total_events})"
+    )
     console.print(f"[dim]Terminal width detected: {terminal_width} cols. Streaming live transactions...[/dim]\n")
 
     is_narrow = terminal_width < 90
@@ -105,7 +107,9 @@ def run_simulation(tps: int = 5, total_events: int = 50, chaos_rate: float = 0.1
     if not is_narrow:
         console.print(table)
 
-    console.print(f"\n[bold cyan][DONE] Simulation completed successfully! Total events generated: {total_events}[/bold cyan]")
+    console.print(
+        f"\n[bold cyan][DONE] Simulation completed successfully! Total events generated: {total_events}[/bold cyan]"
+    )
 
 
 if __name__ == "__main__":
@@ -116,4 +120,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_simulation(tps=args.tps, total_events=args.events, chaos_rate=args.chaos)
-

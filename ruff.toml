@@ -1,0 +1,15 @@
+line-length = 120
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "W"]
+ignore = [
+    "E501", # Line length handled by code formatting
+    "F401", # Unused imports in __init__ and tests
+    "E402", # Module level import not at top of file (sys.path injection)
+    "F841", # Local variable assigned but unused
+    "W291", # Trailing whitespace in multi-line strings / markdown
+    "W293", # Blank line whitespace
+    "E741", # Ambiguous variable name
+    "E712", # Equality comparison to True/False in PySpark/Pandas filter expressions
+]

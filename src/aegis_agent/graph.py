@@ -18,6 +18,7 @@ from aegis_agent.tools.llm_remediation import generate_llm_remediation
 # Node 1: Triage Node
 # =====================================================================
 
+
 def triage_node(state: IncidentState) -> Dict[str, Any]:
     """Ingests break payload, evaluates severity, and sets initial triage class."""
     payload = state.get("break_payload", {})
@@ -36,17 +37,14 @@ def triage_node(state: IncidentState) -> Dict[str, Any]:
         "severity": severity,
         "triage_classification": break_type,
         "financial_impact_usd": abs(amount),
-        "audit_trail": [{
-            "node": "triage_node",
-            "status": "COMPLETED",
-            "severity_assigned": severity
-        }]
+        "audit_trail": [{"node": "triage_node", "status": "COMPLETED", "severity_assigned": severity}],
     }
 
 
 # =====================================================================
 # Node 2: Forensic Node
 # =====================================================================
+
 
 def forensic_node(state: IncidentState) -> Dict[str, Any]:
     """Quarantines the corrupted record and fetches deep-dive database forensics."""
@@ -58,17 +56,14 @@ def forensic_node(state: IncidentState) -> Dict[str, Any]:
         "quarantine_status": True,
         "quarantine_table_ref": "silver_reconciliation_quarantine",
         "forensic_inspection_results": forensics,
-        "audit_trail": [{
-            "node": "forensic_node",
-            "status": "COMPLETED",
-            "quarantined_auth_id": auth_id
-        }]
+        "audit_trail": [{"node": "forensic_node", "status": "COMPLETED", "quarantined_auth_id": auth_id}],
     }
 
 
 # =====================================================================
 # Node 3: Lineage Node (SQLglot AST)
 # =====================================================================
+
 
 def lineage_node(state: IncidentState) -> Dict[str, Any]:
     """Traces upstream column lineage using SQLglot AST parser."""
@@ -86,16 +81,14 @@ def lineage_node(state: IncidentState) -> Dict[str, Any]:
         "root_cause_column": "raw_amount",
         "root_cause_table": "stg_silver_authorizations",
         "impacted_downstream_pipelines": ["fact_card_authorizations", "fact_reconciliation_breaks"],
-        "audit_trail": [{
-            "node": "lineage_node",
-            "status": "COMPLETED"
-        }]
+        "audit_trail": [{"node": "lineage_node", "status": "COMPLETED"}],
     }
 
 
 # =====================================================================
 # Node 4: Remediation Node
 # =====================================================================
+
 
 def remediation_node(state: IncidentState) -> Dict[str, Any]:
     """Generates SQL patch and rationale via Qwen 2.5 Coder (Hugging Face) with dry-run validation."""
@@ -105,10 +98,7 @@ def remediation_node(state: IncidentState) -> Dict[str, Any]:
     expression = state.get("ast_lineage_graph", {}).get("expression", "raw_amount * 100")
 
     llm_res = generate_llm_remediation(
-        root_cause_table=table,
-        root_cause_column=column,
-        expression=expression,
-        break_payload=payload
+        root_cause_table=table, root_cause_column=column, expression=expression, break_payload=payload
     )
 
     return {
@@ -116,12 +106,14 @@ def remediation_node(state: IncidentState) -> Dict[str, Any]:
         "patch_rationale": llm_res["patch_rationale"],
         "dry_run_success": True,
         "patch_validation_results": {"syntax_valid": True, "shadow_run": "PASSED", "provider": llm_res["provider"]},
-        "audit_trail": [{
-            "node": "remediation_node",
-            "status": "COMPLETED",
-            "provider": llm_res["provider"],
-            "model": llm_res["model_name"]
-        }]
+        "audit_trail": [
+            {
+                "node": "remediation_node",
+                "status": "COMPLETED",
+                "provider": llm_res["provider"],
+                "model": llm_res["model_name"],
+            }
+        ],
     }
 
 
@@ -129,18 +121,21 @@ def remediation_node(state: IncidentState) -> Dict[str, Any]:
 # Node 5: Human Review Node (HITL Gate via interrupt())
 # =====================================================================
 
+
 def human_review_node(state: IncidentState) -> Dict[str, Any]:
     """
     HITL Interrupt Gate using LangGraph 1.2+ interrupt().
     Pauses execution until a human compliance officer approves or rejects.
     """
-    approval_response = interrupt({
-        "action": "human_review_required",
-        "incident_id": state.get("incident_id"),
-        "severity": state.get("severity"),
-        "proposed_patch": state.get("proposed_patch"),
-        "financial_impact_usd": state.get("financial_impact_usd")
-    })
+    approval_response = interrupt(
+        {
+            "action": "human_review_required",
+            "incident_id": state.get("incident_id"),
+            "severity": state.get("severity"),
+            "proposed_patch": state.get("proposed_patch"),
+            "financial_impact_usd": state.get("financial_impact_usd"),
+        }
+    )
 
     status = approval_response.get("status", "REJECTED")
     reviewer_id = approval_response.get("reviewer_id", "unassigned_reviewer")
@@ -148,11 +143,7 @@ def human_review_node(state: IncidentState) -> Dict[str, Any]:
     return {
         "human_approval_status": status,
         "human_reviewer_id": reviewer_id,
-        "audit_trail": [{
-            "node": "human_review_node",
-            "status": status,
-            "reviewer_id": reviewer_id
-        }]
+        "audit_trail": [{"node": "human_review_node", "status": status, "reviewer_id": reviewer_id}],
     }
 
 
@@ -160,23 +151,21 @@ def human_review_node(state: IncidentState) -> Dict[str, Any]:
 # Node 6: Compliance Node
 # =====================================================================
 
+
 def compliance_node(state: IncidentState) -> Dict[str, Any]:
     """Logs immutable audit trail and signs off under SOX / DORA regulatory rules."""
     signoff_id = f"SOX-COMPLIANCE-{state.get('incident_id', 'INC-000')}"
     return {
         "compliance_audit_logged": True,
         "compliance_signoff_id": signoff_id,
-        "audit_trail": [{
-            "node": "compliance_node",
-            "status": "SEALED",
-            "signoff": signoff_id
-        }]
+        "audit_trail": [{"node": "compliance_node", "status": "SEALED", "signoff": signoff_id}],
     }
 
 
 # =====================================================================
 # Conditional Edge Router & Graph Builder
 # =====================================================================
+
 
 def route_after_review(state: IncidentState) -> Literal["compliance_node", "__end__"]:
     """Routes to compliance if approved; terminates workflow if rejected."""
@@ -209,12 +198,7 @@ def build_incident_commander_graph(checkpointer: Optional[Any] = None):
 
     # 3. Add conditional edge for HITL approval gate
     builder.add_conditional_edges(
-        "human_review_node",
-        route_after_review,
-        {
-            "compliance_node": "compliance_node",
-            "__end__": END
-        }
+        "human_review_node", route_after_review, {"compliance_node": "compliance_node", "__end__": END}
     )
 
     # 4. Final edge from compliance to END

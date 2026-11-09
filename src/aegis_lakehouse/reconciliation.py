@@ -106,11 +106,10 @@ def run_three_way_reconciliation(
         .otherwise("MATCHED")
     )
     reconciled = (
-        with_id
-        .withColumn("reconciliation_status", status_col)
+        with_id.withColumn("reconciliation_status", status_col)
         .withColumn(
             "discrepancy_amount",
-            F.coalesce(F.col("settle_amount"), F.lit(0)) - F.coalesce(F.col("auth_amount"), F.lit(0))
+            F.coalesce(F.col("settle_amount"), F.lit(0)) - F.coalesce(F.col("auth_amount"), F.lit(0)),
         )
         .withColumn("reconciled_at", F.current_timestamp())
         .select(
@@ -123,7 +122,8 @@ def run_three_way_reconciliation(
             "reconciled_at",
         )
     )
-    return reconciled       
+    return reconciled
+
 
 def upsert_reconciliation_breaks(
     spark: SparkSession,
@@ -155,11 +155,8 @@ def upsert_reconciliation_breaks(
     delta_table = DeltaTable.forPath(spark, target_table_path)
     (
         delta_table.alias("target")
-        .merge(
-            breaks_df.alias("source"),
-            "target.authorization_id = source.authorization_id"
-        )
+        .merge(breaks_df.alias("source"), "target.authorization_id = source.authorization_id")
         .whenMatchedUpdateAll()
         .whenNotMatchedInsertAll()
         .execute()
-    )   
+    )

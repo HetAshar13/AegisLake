@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 try:
     from google import genai
     from google.genai import types
+
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -26,6 +27,7 @@ except ImportError:
 # Check Hugging Face availability
 try:
     from huggingface_hub import InferenceClient
+
     HF_AVAILABLE = True
 except ImportError:
     HF_AVAILABLE = False
@@ -86,7 +88,7 @@ Return a valid JSON object ONLY with the following keys:
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     temperature=0.1,
-                )
+                ),
             )
 
             parsed = json.loads(response.text.strip())

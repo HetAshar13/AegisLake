@@ -1,5 +1,4 @@
-"""Tests for AegisLake Spark Session & Delta Lake Foundation.
-"""
+"""Tests for AegisLake Spark Session & Delta Lake Foundation."""
 
 import json
 import shutil
@@ -93,7 +92,7 @@ class TestBronzeLayerIngestion:
         assert "currency" in field_names
         assert "customer_id" in field_names
         assert "status" in field_names
-        
+
         # Verify amount_minor is strictly LongType (financial integer minor units)
         amount_field = next(f for f in schema.fields if f.name == "amount_minor")
         assert isinstance(amount_field.dataType, LongType)
@@ -135,7 +134,7 @@ class TestBronzeLayerIngestion:
                 "merchant_mcc": "5812",
             },
         ]
-        
+
         event_file = source_dir / "batch_01.json"
         with open(event_file, "w") as f:
             for ev in raw_events:
@@ -153,16 +152,16 @@ class TestBronzeLayerIngestion:
         # Verify Delta table and checkpoint directory creation
         delta_log = Path(bronze_table_dir) / "_delta_log"
         assert delta_log.exists()
-        
+
         # Verify records and audit columns in Bronze Delta table
         bronze_df = spark_session.read.format("delta").load(bronze_table_dir)
         assert bronze_df.count() == 2
-        
+
         cols = bronze_df.columns
         assert "ingested_at" in cols
         assert "source_file" in cols
         assert "authorization_id" in cols
-        
+
         currencies = [row.currency for row in bronze_df.select("currency").collect()]
         assert set(currencies) == {"EUR", "USD"}
 
@@ -293,10 +292,7 @@ class TestMultiRailReconciliation:
         assert reconciled_df.count() == 5
 
         # Collect break statuses by authorization_id
-        statuses = {
-            row["authorization_id"]: row["reconciliation_status"]
-            for row in reconciled_df.collect()
-        }
+        statuses = {row["authorization_id"]: row["reconciliation_status"] for row in reconciled_df.collect()}
 
         assert statuses["auth_1"] == "MATCHED"
         assert statuses["auth_2"] == "BREAK_UNMATCHED_AUTHORIZATION"

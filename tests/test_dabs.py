@@ -62,7 +62,9 @@ class TestDatabricksAssetBundles:
         assert autoscale.get("max_workers") == 4
 
         aws_attr = new_cluster.get("aws_attributes", {})
-        assert aws_attr.get("availability") == "SPOT_WITH_FALLBACK", "Production job cluster should leverage Spot with fallback"
+        assert aws_attr.get("availability") == "SPOT_WITH_FALLBACK", (
+            "Production job cluster should leverage Spot with fallback"
+        )
 
     def test_task_dag_dependency_chain(self):
         """Asserts strict sequential execution: Ingestion -> Silver CDF -> dbt Marts -> Agent."""
@@ -75,7 +77,7 @@ class TestDatabricksAssetBundles:
             "01_streaming_ingestion",
             "02_silver_reconciliation_cdf",
             "03_dbt_kimball_marts",
-            "04_autonomous_incident_commander"
+            "04_autonomous_incident_commander",
         ]
         assert task_keys == expected_keys, f"Tasks DAG mismatch: expected {expected_keys}, got {task_keys}"
 
@@ -102,4 +104,5 @@ class TestDatabricksAssetBundles:
         """Asserts the dbt runner script for Databricks task exists and passes py_compile."""
         assert DBT_RUNNER.exists(), "scripts/run_dbt_databricks.py does not exist"
         import py_compile
+
         py_compile.compile(str(DBT_RUNNER), doraise=True)

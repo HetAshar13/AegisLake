@@ -27,13 +27,13 @@ def create_aegis_spark_session(
     shuffle_partitions: int = 4,
 ) -> SparkSession:
     """Creates an ACID-enabled SparkSession with Delta Lake 3.2.0 extensions.
-    
+
     Args:
         app_name: Name of the Spark application.
         warehouse_dir: Local path for Delta Lake storage. Defaults to `data/lakehouse`.
         driver_memory: Memory cap for the JVM driver (e.g. '2g').
         shuffle_partitions: Number of partitions to use when shuffling data.
-        
+
     Returns:
         SparkSession: Configured active SparkSession with Delta support.
     """
@@ -54,14 +54,17 @@ def create_aegis_spark_session(
     # 7. Wrap the builder using `configure_spark_with_delta_pip(builder).getOrCreate()`
     # 8. Set log level to 'WARN' to reduce terminal noise: `spark.sparkContext.setLogLevel("WARN")`
     # 9. Return the spark instance.
-    
-    builder = ( SparkSession.builder.appName(app_name).master("local[*]")
-    .config("spark.driver.memory", driver_memory)
-    .config("spark.sql.shuffle.partitions", str(shuffle_partitions))
-    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-    .config("spark.sql.warehouse.dir", target_warehouse))
-    
+
+    builder = (
+        SparkSession.builder.appName(app_name)
+        .master("local[*]")
+        .config("spark.driver.memory", driver_memory)
+        .config("spark.sql.shuffle.partitions", str(shuffle_partitions))
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        .config("spark.sql.warehouse.dir", target_warehouse)
+    )
+
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
     spark.sparkContext.setLogLevel("WARN")
     return spark

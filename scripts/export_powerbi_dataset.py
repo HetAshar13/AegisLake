@@ -15,6 +15,7 @@ if sys.platform == "win32":
 DB_PATH = "aegis_dbt/aegislake_warehouse.duckdb"
 OUTPUT_DIR = Path("aegis_bi/data")
 
+
 def main():
     print("=" * 65)
     print("📊 AegisLake: Exporting Power BI Semantic Dataset")
@@ -46,6 +47,7 @@ def main():
     # Also export all tables into a unified multi-sheet Excel workbook for 1-click Power BI import
     excel_path = OUTPUT_DIR / "aegislake_semantic_model.xlsx"
     import pandas as pd
+
     with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
         for table in tables:
             df = conn.execute(f"SELECT * FROM {table}").df()
@@ -59,6 +61,7 @@ def main():
     print("-" * 65)
     print(f"📁 Dataset files saved to: {OUTPUT_DIR.resolve()}")
     print("=" * 65)
+
 
 if __name__ == "__main__":
     main()

@@ -63,7 +63,7 @@ class PaymentStreamProducer:
         cid = customer_id or random.choice(self.customers)
         curr = currency or random.choice(self.currencies)
         merchant = random.choice(MERCHANTS)
-        
+
         if amount_minor is None:
             if curr == "JPY":
                 # Typical JPY transactions: ¥800 to ¥65,000
@@ -99,7 +99,7 @@ class PaymentStreamProducer:
         settlement_id = f"stl_{uuid4().hex[:16]}"
         clearinghouse = random.choice(CLEARINGHOUSES)
         batch_id = f"batch_{datetime.now(timezone.utc).strftime('%Y%m%d%H')}"
-        
+
         # Calculate fee in minor units: fee = amount * (bps / 10000)
         fee_minor = max(1, int(auth.amount_minor * (fee_basis_points / 10000.0)))
         settled_at = auth.authorized_at + timedelta(seconds=delay_seconds)
@@ -131,7 +131,7 @@ class PaymentStreamProducer:
         settlement_ratio: float = 0.95,
     ) -> Tuple[List[CardAuthorizationEvent], List[ClearinghouseSettlementEvent]]:
         """Generates a batch of authorizations and their corresponding settlements.
-        
+
         settlement_ratio simulates realistic real-world settlement timing:
         e.g., 95% settle immediately, while 5% are in-flight / pending settlement.
         """

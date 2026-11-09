@@ -72,17 +72,18 @@ class IncidentState(TypedDict, total=False):
        - error_state: Annotated[Dict[str, Any], merge_dicts]
        - retry_count: int
     """
+
     incident_id: str
     rail_source: Literal["revolut", "ion_group", "internal_lakehouse"]
     timestamp: str
     severity: Literal["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNASSIGNED"]
-   
+
     break_payload: Dict[str, Any]
     triage_classification: Optional[str]
-    financial_impact_usd: float       
+    financial_impact_usd: float
     affected_assets: List[str]
 
-    quarantine_status: bool 
+    quarantine_status: bool
     quarantine_table_ref: Optional[str]
     forensic_inspection_results: Dict[str, Any]
 
@@ -105,5 +106,3 @@ class IncidentState(TypedDict, total=False):
     audit_trail: Annotated[List[Dict[str, Any]], add]
     error_state: Annotated[Dict[str, Any], merge_dicts]
     retry_count: int
-
-
