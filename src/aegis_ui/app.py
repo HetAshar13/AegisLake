@@ -610,12 +610,12 @@ with tab3:
 
 with tab4:
     st.markdown("### 📐 System Architecture & Mathematical Invariant Proofs")
-    st.markdown("Deep technical specifications for enterprise data & platform engineering panels.")
+    st.markdown("Deep technical specifications and architectural guarantees for enterprise data & platform engineering teams.")
 
     col_t4_1, col_t4_2 = st.columns(2)
 
     with col_t4_1:
-        st.markdown("#### 🧪 **Automated Test Matrix: 75/75 VERIFIED GREEN**")
+        st.markdown("#### 🧪 **Automated Test Matrix: 96/96 VERIFIED GREEN**")
         st.markdown(
             """
             | Verification Layer | Technology | Tests Passed | Status |
@@ -624,7 +624,9 @@ with tab4:
             | **Module 2 (Lakehouse)** | PySpark / Delta Lake CDF | 12 / 12 | **100% PASS** |
             | **Module 3 (dbt Marts)** | dbt Core / DuckDB | 40 / 40 | **100% PASS** |
             | **Module 4 (Multi-Agent)** | LangGraph / SQLglot AST | 12 / 12 | **100% PASS** |
-            | **Total System Proof** | **Complete AegisLake Suite** | **75 / 75** | **100% GREEN** |
+            | **Module 5 (Mission Control)** | Replay & LLM Remediation | 6 / 6 | **100% PASS** |
+            | **Module 6 (Cloud & CI/CD)** | Terraform, DABs & GitHub Actions | 15 / 15 | **100% PASS** |
+            | **Total System Proof** | **Complete AegisLake Suite** | **96 / 96** | **100% GREEN** |
             """
         )
 
@@ -635,12 +637,13 @@ with tab4:
         )
 
     with col_t4_2:
-        st.markdown("#### 💡 **Why AegisLake Wins in System Design Interviews**")
+        st.markdown("#### 💡 **Core Architectural Design Principles & Differentiators**")
         st.markdown(
             """
             1. **Zero LLM Token Hallucination:** Lineage is computed in O(V+E) time using SQLglot compiler ASTs rather than burning 5,000 LLM tokens per query.
             2. **Bank-Grade Compliance (SOX/DORA):** Never rewrites historical ledger truth; gates compensating journal entries behind interactive human-in-the-loop approvals.
             3. **Multi-Rail Decimal Invariant:** Accurately scales ISO-4217 minor units across 0-decimal (JPY), 2-decimal (EUR/USD), and 3-decimal (BHD) currencies.
             4. **Clean Medallion Architecture:** PySpark Delta Lake CDF watermarked stream deduplication paired with DuckDB Kimball dimensional star schemas.
+            5. **Automated Cloud IaC & Workflows:** Production Terraform S3/KMS provisioning and Databricks Asset Bundles (DAB) Lakeflow jobs on Spot clusters with full CI/CD automation.
             """
         )
