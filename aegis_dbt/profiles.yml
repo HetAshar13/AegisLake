@@ -1,0 +1,10 @@
+aegis_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'aegislake_warehouse.duckdb'
+      threads: 4
+      extensions:
+        - delta
+        - parquet

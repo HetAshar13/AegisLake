@@ -1,0 +1,86 @@
+{
+  "model_name": "AegisLake_Financial_Semantic_Model",
+  "version": "1.0",
+  "architecture": "Kimball Star Schema",
+  "tables": {
+    "facts": [
+      {
+        "table_name": "fact_card_authorizations",
+        "type": "TRANSACTION_FACT",
+        "grain": "One row per authorization attempt",
+        "primary_key": "authorization_key",
+        "foreign_keys": {
+          "customer_key": "dim_customers.customer_key",
+          "merchant_key": "dim_merchants.merchant_key",
+          "currency_key": "dim_currencies.currency_key"
+        }
+      },
+      {
+        "table_name": "fact_reconciliation_breaks",
+        "type": "FINANCIAL_BREAK_MART",
+        "grain": "One row per reconciliation match or break",
+        "primary_key": "break_key",
+        "foreign_keys": {
+          "currency_key": "dim_currencies.currency_key"
+        }
+      }
+    ],
+    "dimensions": [
+      {
+        "table_name": "dim_customers",
+        "type": "SCD_TYPE_2",
+        "primary_key": "customer_key",
+        "natural_key": "customer_id",
+        "temporal_tracking": ["valid_from", "valid_to", "is_current"]
+      },
+      {
+        "table_name": "dim_merchants",
+        "type": "TYPE_1_OUTRIGGER",
+        "primary_key": "merchant_key",
+        "natural_key": "merchant_id",
+        "attributes": ["mcc", "mcc_category", "risk_tier"]
+      },
+      {
+        "table_name": "dim_currencies",
+        "type": "TYPE_0_STATIC",
+        "primary_key": "currency_key",
+        "natural_key": "currency_code",
+        "attributes": ["exponent", "is_zero_decimal"]
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "from_table": "fact_card_authorizations",
+      "from_column": "customer_key",
+      "to_table": "dim_customers",
+      "to_column": "customer_key",
+      "cardinality": "MANY_TO_ONE",
+      "cross_filtering": "SINGLE"
+    },
+    {
+      "from_table": "fact_card_authorizations",
+      "from_column": "merchant_key",
+      "to_table": "dim_merchants",
+      "to_column": "merchant_key",
+      "cardinality": "MANY_TO_ONE",
+      "cross_filtering": "SINGLE"
+    },
+    {
+      "from_table": "fact_card_authorizations",
+      "from_column": "currency_key",
+      "to_table": "dim_currencies",
+      "to_column": "currency_key",
+      "cardinality": "MANY_TO_ONE",
+      "cross_filtering": "SINGLE"
+    },
+    {
+      "from_table": "fact_reconciliation_breaks",
+      "from_column": "currency_key",
+      "to_table": "dim_currencies",
+      "to_column": "currency_key",
+      "cardinality": "MANY_TO_ONE",
+      "cross_filtering": "SINGLE"
+    }
+  ]
+}

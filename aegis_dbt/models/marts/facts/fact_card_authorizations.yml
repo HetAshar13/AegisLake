@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: fact_card_authorizations
+    description: "Core transactional fact table capturing all card authorizations with dimensional foreign keys and point-in-time customer KYC state."
+    columns:
+      - name: authorization_key
+        description: "Surrogate key for the fact record: md5(authorization_id)."
+        tests:
+          - unique
+          - not_null
+
+      - name: authorization_id
+        description: "Degenerate dimension natural identifier of the card authorization."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_key
+        description: "Foreign key linking to dim_customers via point-in-time temporal join (nullable for unregistered customers)."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_key
+
+      - name: merchant_key
+        description: "Foreign key linking to dim_merchants (nullable for new merchants)."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_merchants')
+                field: merchant_key
+
+      - name: currency_key
+        description: "Foreign key linking to dim_currencies."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_currencies')
+                field: currency_key
+
+      - name: auth_amount_minor
+        description: "Original minor unit integer amount (cents/pence/yen)."
+        tests:
+          - not_null
+
+      - name: auth_amount_scaled
+        description: "Decimal scaled major amount (e.g. 45.00 EUR) calculated via currency exponent."
+        tests:
+          - not_null

@@ -1,0 +1,46 @@
+# Python & Virtual Environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Environment Variables & Secrets
+.env
+*.env
+*.key
+credentials.json
+
+# dbt Artifacts
+aegis_dbt/target/
+aegis_dbt/dbt_packages/
+aegis_dbt/logs/
+aegis_dbt/.user.yml
+
+# Terraform State & Local Cache
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Databricks Local Overrides
+.databricks/
+
+# Streamlit Local Secrets
+.streamlit/secrets.toml
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.crc
+
+# Antigravity Workspace Directives (Local Agent Files)
+.agents/
+AGENTS.md
+
+# Windows Local Hadoop Binaries
+tools/hadoop/

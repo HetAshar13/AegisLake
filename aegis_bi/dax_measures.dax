@@ -1,0 +1,94 @@
+// =====================================================================
+// AegisLake Enterprise Power BI Semantic Layer: Core DAX Measures
+// Multi-Rail Financial Reconciliation & Operational Risk Analytics
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// 1. Transaction Volume & Financial Exposure Measures
+// ---------------------------------------------------------------------
+
+Total Authorization Count = 
+COUNTROWS('fact_card_authorizations')
+
+Total Authorized Volume Scaled = 
+SUM('fact_card_authorizations'[auth_amount_scaled])
+
+Total Settlement Count = 
+COUNTROWS('fact_reconciliation_breaks')
+
+// Dynamically scaled by currency exponent using RELATED dimension lookup
+Total Reconciled Matched Volume = 
+CALCULATE(
+    SUMX(
+        'fact_reconciliation_breaks',
+        'fact_reconciliation_breaks'[auth_amount_minor] / POWER(10, RELATED('dim_currencies'[exponent]))
+    ),
+    'fact_reconciliation_breaks'[reconciliation_status] = "MATCHED"
+)
+
+// Gross Break Capital at Risk: Uses ABS() so positive and negative breaks don't cancel out
+Gross Break Capital at Risk = 
+CALCULATE(
+    SUMX(
+        'fact_reconciliation_breaks',
+        ABS('fact_reconciliation_breaks'[discrepancy_amount_scaled])
+    ),
+    'fact_reconciliation_breaks'[is_actionable_break] = TRUE()
+)
+
+// Net Balance Discrepancy: Algebraic sum for general ledger suspense balancing
+Net Balance Discrepancy = 
+CALCULATE(
+    SUM('fact_reconciliation_breaks'[discrepancy_amount_scaled]),
+    'fact_reconciliation_breaks'[is_actionable_break] = TRUE()
+)
+
+// ---------------------------------------------------------------------
+// 2. Health & Quality KPI Measures
+// ---------------------------------------------------------------------
+
+Reconciliation Match Rate % = 
+DIVIDE(
+    CALCULATE(COUNTROWS('fact_reconciliation_breaks'), 'fact_reconciliation_breaks'[reconciliation_status] = "MATCHED"),
+    COUNTROWS('fact_reconciliation_breaks'),
+    0
+) * 100
+
+// Actionable Break Rate: Distinct from 100 - Match Rate because pending in-flight items are benign
+Actionable Break Rate % = 
+DIVIDE(
+    CALCULATE(COUNTROWS('fact_reconciliation_breaks'), 'fact_reconciliation_breaks'[is_actionable_break] = TRUE()),
+    COUNTROWS('fact_reconciliation_breaks'),
+    0
+) * 100
+
+High Risk Merchant Break Volume = 
+CALCULATE(
+    [Gross Break Capital at Risk],
+    'dim_merchants'[risk_tier] = "HIGH" || 'dim_merchants'[risk_tier] = "MEDIUM"
+)
+
+// ---------------------------------------------------------------------
+// 3. Mathematical Double-Entry Invariant Proof (Auditor Measure)
+// ---------------------------------------------------------------------
+
+Double Entry Invariant Check = 
+VAR _CalculatedDiff = 
+    SUMX(
+        'fact_reconciliation_breaks',
+        ('fact_reconciliation_breaks'[settled_amount_minor] - 'fact_reconciliation_breaks'[auth_amount_minor]) 
+        - 'fact_reconciliation_breaks'[discrepancy_amount_minor]
+    )
+RETURN
+    IF(_CalculatedDiff = 0, "INVARIANT_VERIFIED_BALANCED", "INVARIANT_VIOLATION_DETECTED")
+
+// ---------------------------------------------------------------------
+// 4. Regulatory & Scheme Hold Expiry (Visa/Mastercard 7-Day Rule)
+// ---------------------------------------------------------------------
+
+Expired Authorization Hold Releases (Over 7 Days) = 
+CALCULATE(
+    COUNTROWS('fact_card_authorizations'),
+    'fact_card_authorizations'[auth_status] = "APPROVED",
+    DATEDIFF('fact_card_authorizations'[auth_timestamp], NOW(), DAY) >= 7
+)

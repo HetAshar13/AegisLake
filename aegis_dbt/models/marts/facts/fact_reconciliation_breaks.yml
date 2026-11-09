@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: fact_reconciliation_breaks
+    description: "Financial reconciliation fact table capturing breaks across internal authorizations, clearinghouse settlements, and general ledger."
+    columns:
+      - name: break_key
+        description: "Surrogate primary key: md5(reconciliation_id)."
+        tests:
+          - unique
+          - not_null
+
+      - name: authorization_id
+        description: "Identifier of the transaction rail."
+        tests:
+          - not_null
+
+      - name: reconciliation_status
+        description: "Taxonomy of reconciliation matching."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - 'MATCHED'
+                  - 'BREAK_UNMATCHED_AUTHORIZATION'
+                  - 'BREAK_UNMATCHED_SETTLEMENT'
+                  - 'BREAK_AMOUNT_MISMATCH'
+                  - 'BREAK_CURRENCY_MISMATCH'
+
+      - name: currency_key
+        description: "Foreign key linking to dim_currencies."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_currencies')
+                field: currency_key
+
+      - name: discrepancy_amount_minor
+        description: "Variance in minor units: settled_amount - auth_amount."
+        tests:
+          - not_null
+
+      - name: discrepancy_amount_scaled
+        description: "Decimal scaled variance formatted using currency exponent."
+        tests:
+          - not_null
+
+      - name: is_actionable_break
+        description: "Boolean flag: TRUE if this record is an actionable break, FALSE if clean MATCHED."
+        tests:
+          - not_null

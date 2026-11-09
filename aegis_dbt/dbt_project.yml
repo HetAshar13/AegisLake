@@ -1,0 +1,26 @@
+name: 'aegis_dbt'
+version: '1.0.0'
+config-version: 2
+
+profile: 'aegis_dbt'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  aegis_dbt:
+    staging:
+      +materialized: view
+    marts:
+      dimensions:
+        +materialized: table
+      facts:
+        +materialized: table

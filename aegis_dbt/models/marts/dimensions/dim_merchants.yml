@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: dim_merchants
+    description: "Merchant dimension mapping merchant identifiers to ISO-18245 MCC categories and risk tiers."
+    columns:
+      - name: merchant_key
+        description: "Surrogate key generated via md5(merchant_id)."
+        tests:
+          - unique
+          - not_null
+
+      - name: merchant_id
+        description: "Natural alphanumeric identifier of the merchant."
+        tests:
+          - unique
+          - not_null
+
+      - name: mcc
+        description: "4-digit Merchant Category Code."
+        tests:
+          - not_null
+
+      - name: category_name
+        description: "Decoded business category (GROCERY, DINING, TRANSPORT, FUEL, RETAIL)."
+        tests:
+          - not_null

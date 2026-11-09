@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: delta_lakehouse
+    description: "PySpark Medallion Delta Lake storage layer on disk"
+    tables:
+      - name: silver_authorizations
+        description: "Clean Silver Card Authorizations Delta table"
+        meta:
+          external_location: "delta_scan('c:/Users/het81/Downloads/Data Project/data/lakehouse/silver_authorizations')"
+
+      - name: silver_reconciliation_breaks
+        description: "Three-way financial reconciliation breaks Delta table"
+        meta:
+          external_location: "delta_scan('c:/Users/het81/Downloads/Data Project/data/lakehouse/silver_reconciliation_breaks')"

@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Customer dimension implementing Slowly Changing Dimension Type 2 (SCD2) for historical KYC and risk rating preservation."
+    columns:
+      - name: customer_key
+        description: "Surrogate key generated via md5(customer_id || valid_from) ensuring uniqueness per customer version."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Natural customer identifier (may appear multiple times across history)."
+        tests:
+          - not_null
+
+      - name: customer_name
+        description: "Legal customer name."
+        tests:
+          - not_null
+
+      - name: kyc_tier
+        description: "KYC verification tier (TIER_1_BASIC, TIER_2_STANDARD, TIER_3_ENHANCED)."
+        tests:
+          - not_null
+
+      - name: risk_score
+        description: "Risk assessment score (1 to 100)."
+        tests:
+          - not_null
+
+      - name: valid_from
+        description: "Timestamp when this version of the customer record became active."
+        tests:
+          - not_null
+
+      - name: is_current
+        description: "Boolean flag: TRUE if this is the active current record, FALSE if historical."
+        tests:
+          - not_null

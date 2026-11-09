@@ -1,0 +1,6 @@
+currency_key,currency_code,currency_name,currency_exponent,subdivision_name,is_zero_decimal,created_at
+a055562bdb59ad8ba9cc680367308118,EUR,Euro,2,Cent,false,2026-11-07 01:30:47.129992+01
+3518f8944d42212dd37daffe097d216e,USD,US Dollar,2,Cent,false,2026-11-07 01:30:47.129992+01
+3add2285094fdc3186902810080c1465,GBP,British Pound,2,Penny,false,2026-11-07 01:30:47.129992+01
+0d22295dba298b8a4831a943545b0810,JPY,Japanese Yen,0,Yen,true,2026-11-07 01:30:47.129992+01
+c755a2fcb660094f0d712c90fcd40753,BHD,Bahraini Dinar,3,Fils,false,2026-11-07 01:30:47.129992+01

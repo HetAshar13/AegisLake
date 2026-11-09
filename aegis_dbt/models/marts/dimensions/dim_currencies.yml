@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: dim_currencies
+    description: "ISO-4217 Currency specification dimension governing decimal scaling factors."
+    columns:
+      - name: currency_key
+        description: "Surrogate key generated via md5(currency_code)."
+        tests:
+          - unique
+          - not_null
+
+      - name: currency_code
+        description: "Three-letter ISO-4217 alpha currency code."
+        tests:
+          - unique
+          - not_null
+
+      - name: currency_exponent
+        description: "Number of decimal places in minor unit."
+        tests:
+          - not_null

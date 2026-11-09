@@ -1,0 +1,5 @@
+# AegisLake Production Deployment Variables Example
+environment       = "prod"
+project_name      = "aegislake"
+aws_region        = "eu-west-1"
+enable_versioning = true

@@ -1,0 +1,20 @@
+# Enforce consistent line endings across platforms
+* text=auto eol=lf
+
+# Explicit text files
+*.py text eol=lf
+*.sql text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.tf text eol=lf
+*.json text eol=lf
+
+# Binary files
+*.pbix binary
+*.xlsx binary
+*.parquet binary
+*.duckdb binary
+*.png binary
+*.jpg binary
+*.jpeg binary

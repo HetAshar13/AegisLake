@@ -1,0 +1,69 @@
+resources:
+  jobs:
+    aegislake_reconciliation_workflow:
+      name: "AegisLake Financial Reconciliation & Autonomous Diagnostic Pipeline"
+
+      job_clusters:
+        - job_cluster_key: aegis_job_cluster
+          new_cluster:
+            spark_version: "13.3.x-scala2.12"
+            node_type_id: "i3.xlarge"
+            autoscale:
+              min_workers: 1
+              max_workers: 4
+            aws_attributes:
+              instance_profile_arn: "arn:aws:iam::123456789012:instance-profile/aegislake-spark-worker-profile-prod"
+              availability: "SPOT_WITH_FALLBACK"
+
+      tasks:
+        # Task 1: Poisson Ingestion & Replay Engine (Kafka/Redpanda -> Bronze Delta)
+        - task_key: 01_streaming_ingestion
+          job_cluster_key: aegis_job_cluster
+          spark_python_task:
+            python_file: ../src/aegis_streaming/replay_engine.py
+            parameters:
+              - "--catalog"
+              - "${var.catalog}"
+              - "--schema"
+              - "${var.schema}"
+
+        # Task 2: PySpark Silver Delta Lake CDF & Three-Way Reconciliation
+        - task_key: 02_silver_reconciliation_cdf
+          depends_on:
+            - task_key: 01_streaming_ingestion
+          job_cluster_key: aegis_job_cluster
+          spark_python_task:
+            python_file: ../src/aegis_lakehouse/silver.py
+            parameters:
+              - "--enable_cdf"
+              - "true"
+              - "--s3_bucket"
+              - "${var.s3_lakehouse_bucket}"
+
+        # Task 3: dbt Kimball Star Schema Models & Great Expectations Invariant Tests
+        - task_key: 03_dbt_kimball_marts
+          depends_on:
+            - task_key: 02_silver_reconciliation_cdf
+          job_cluster_key: aegis_job_cluster
+          spark_python_task:
+            python_file: ../scripts/run_dbt_databricks.py
+
+        # Task 4: Autonomous Incident Commander Copilot (LangGraph & AST Lineage)
+        - task_key: 04_autonomous_incident_commander
+          depends_on:
+            - task_key: 03_dbt_kimball_marts
+          job_cluster_key: aegis_job_cluster
+          spark_python_task:
+            python_file: ../src/aegis_agent/graph.py
+            parameters:
+              - "--quarantine_scan"
+              - "true"
+
+      schedule:
+        quartz_cron_expression: "0 0/15 * * * ?"
+        timezone_id: "UTC"
+        pause_status: "UNPAUSED"
+
+      email_notifications:
+        on_failure:
+          - "hetashar13@gmail.com"
