@@ -38,6 +38,9 @@ aegis_dbt/.user.yml
 Thumbs.db
 *.crc
 
+# Personal / Career Artifacts (Kept local, excluded from public repo)
+CAREER_PACKAGING.md
+
 # Antigravity Workspace Directives (Local Agent Files)
 .agents/
 AGENTS.md

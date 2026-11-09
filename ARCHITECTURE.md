@@ -2,7 +2,7 @@
 
 > **System:** AegisLake — Self-Healing Financial Data Lakehouse & Autonomous Reconciliation Control Plane  
 > **Lead Architect:** **Het Hargovind Ashar** (*MSc Computer Science & Engineering — Politecnico di Milano*)  
-> **Target Institutions:** Revolut, ION Group Milan, Databricks, Amazon, Bending Spoons
+> **Classification:** Enterprise Distributed Financial Systems & Data Engineering Specification
 
 ---
 

@@ -77,12 +77,12 @@ flowchart TB
 
 ---
 
-## Dual-Track Architecture Review Guide
+## Technical Architecture Domains
 
-To evaluate AegisLake based on your hiring specialization, navigate directly to your domain:
+AegisLake's system design is organized into two primary engineering domains:
 
-### Track 1: Data Engineering & Distributed Systems
-*Focus for technical panels at **Revolut**, **ION Group**, **Databricks**, and **Amazon**.*
+### Domain 1: Distributed Lakehouse Engineering & Real-Time Streaming
+High-velocity multi-rail payment ingestion, event-time watermarked deduplication, and transactional Delta Lake pipelines.
 
 1. **PySpark Structured Streaming & Watermarking:**
    - 10-minute event-time watermark handles out-of-order network latency (`withWatermark("event_timestamp", "10 minutes")`).
@@ -103,8 +103,8 @@ To evaluate AegisLake based on your hiring specialization, navigate directly to 
 
 ---
 
-### Track 2: Applied AI & Autonomous Agent Systems
-*Focus for technical panels at **Revolut Applied AI**, **Bending Spoons**, and **AI Engineering Teams**.*
+### Domain 2: Autonomous Agentic Diagnostics & AST Lineage Compilation
+Deterministic compiler-driven column lineage, shadow-validated SQL remediation, and regulatory Human-in-the-Loop governance.
 
 1. **State Machine Formulation (LangGraph 1.2+):**
    - Cyclic graph built with `langgraph==1.2.20` and `MemorySaver` checkpointer.
@@ -158,45 +158,45 @@ Open **`http://localhost:8501`** to interact with the Live Stream Engine, inject
 
 ---
 
-## 20-Question System Design Defense Playbook
+## Deep-Dive Architectural Decisions & Engineering FAQ (ADR Review)
 
-This playbook contains the exact technical answers to the most rigorous architectural questions asked in Tier-1 FinTech and Big Tech system design loops.
+Detailed technical rationales for core trade-offs, performance optimizations, and regulatory invariants implemented across AegisLake.
 
 ### Category 1: Streaming & PySpark Delta Lakehouse
 
 #### Q1: Why use Redpanda / Kafka with Poisson inter-arrival times instead of standard uniform timers?
-**Defense:** Real-world payment networks (Visa/Mastercard) experience bursty, clustered traffic following Poisson point processes ($\Delta t \sim \text{Exp}(\lambda)$), with spikes during shopping events. Uniform timers fail to test thread pool exhaustion, buffer overflow in Spark receivers, and consumer lag spikes.
+**Architectural Rationale:** Real-world payment networks (Visa/Mastercard) experience bursty, clustered traffic following Poisson point processes ($\Delta t \sim \text{Exp}(\lambda)$), with spikes during shopping events. Uniform timers fail to test thread pool exhaustion, buffer overflow in Spark receivers, and consumer lag spikes.
 
 #### Q2: How does AegisLake prevent duplicate transactions across streaming retries?
-**Defense:** We implement end-to-end idempotency at two layers: (1) The producer generates deterministic UUIDv5 idempotency keys derived from `(auth_id, merchant_id, amount_minor, timestamp)`. (2) PySpark Structured Streaming executes `dropDuplicates(["idempotency_key"])` over a 10-minute event-time watermark window, discarding network duplicates.
+**Architectural Rationale:** We implement end-to-end idempotency at two layers: (1) The producer generates deterministic UUIDv5 idempotency keys derived from `(auth_id, merchant_id, amount_minor, timestamp)`. (2) PySpark Structured Streaming executes `dropDuplicates(["idempotency_key"])` over a 10-minute event-time watermark window, discarding network duplicates.
 
 #### Q3: Why is Delta Lake Change Data Feed (CDF) essential for financial reconciliation?
-**Defense:** Traditional lakehouse pipelines require full partition overwrites or expensive full-table diffs to track ledger corrections. Delta CDF emits row-level change events (`_change_type`), enabling downstream dbt models and streaming anomaly agents to ingest only net changes in $O(1)$ delta time without reprocessing historical tables.
+**Architectural Rationale:** Traditional lakehouse pipelines require full partition overwrites or expensive full-table diffs to track ledger corrections. Delta CDF emits row-level change events (`_change_type`), enabling downstream dbt models and streaming anomaly agents to ingest only net changes in $O(1)$ delta time without reprocessing historical tables.
 
 #### Q4: Why did you partition Delta Lake by date and currency rather than transaction ID?
-**Defense:** Transaction ID has ultra-high cardinality, creating millions of tiny files that degrade the Spark driver's Catalyst optimizer and S3 metadata operations. Partitioning by `(event_date, currency)` aligns with financial query patterns (daily reconciliations per currency corridor) and enables optimal Delta Lake Liquid Clustering / compaction.
+**Architectural Rationale:** Transaction ID has ultra-high cardinality, creating millions of tiny files that degrade the Spark driver's Catalyst optimizer and S3 metadata operations. Partitioning by `(event_date, currency)` aligns with financial query patterns (daily reconciliations per currency corridor) and enables optimal Delta Lake Liquid Clustering / compaction.
 
 #### Q5: What is the exact difference between Delta Lake compaction and VACUUM?
-**Defense:** Compaction (`OPTIMIZE`) rewrites small Parquet files into uniform 1GB files without modifying data, eliminating small-file read degradation. `VACUUM` permanently deletes underlying unreferenced Parquet files older than the retention period (e.g. 7 days), preventing storage cost bloat while preserving time-travel capabilities within the SLA.
+**Architectural Rationale:** Compaction (`OPTIMIZE`) rewrites small Parquet files into uniform 1GB files without modifying data, eliminating small-file read degradation. `VACUUM` permanently deletes underlying unreferenced Parquet files older than the retention period (e.g. 7 days), preventing storage cost bloat while preserving time-travel capabilities within the SLA.
 
 ---
 
 ### Category 2: Financial Precision & Data Modeling
 
 #### Q6: Why does AegisLake ban Python `float` and SQL `FLOAT`/`DOUBLE` for monetary amounts?
-**Defense:** IEEE 754 floating-point numbers represent base-10 fractions in binary, causing irreversible precision loss (e.g. `0.1 + 0.2 = 0.30000000000000004`). In a €100M clearing pipeline, fractional truncation creates thousands of phantom reconciliation breaks. AegisLake strictly represents monetary values as integer minor units (`BIGINT` cents, yen, or fils) and scales via ISO-4217 exponents.
+**Architectural Rationale:** IEEE 754 floating-point numbers represent base-10 fractions in binary, causing irreversible precision loss (e.g. `0.1 + 0.2 = 0.30000000000000004`). In a €100M clearing pipeline, fractional truncation creates thousands of phantom reconciliation breaks. AegisLake strictly represents monetary values as integer minor units (`BIGINT` cents, yen, or fils) and scales via ISO-4217 exponents.
 
 #### Q7: How does your model handle 0-decimal (JPY) vs. 2-decimal (EUR/USD) vs. 3-decimal (BHD) currencies?
-**Defense:** We maintain `dim_currencies` with an explicit `currency_exponent` column (JPY=0, EUR=2, BHD=3). All ingestion and reconciliation math is evaluated in integer minor units, and scaled via $A_{\text{scaled}} = A_{\text{minor}} \times 10^{-\text{exponent}}$ strictly at the dimensional presentation layer.
+**Architectural Rationale:** We maintain `dim_currencies` with an explicit `currency_exponent` column (JPY=0, EUR=2, BHD=3). All ingestion and reconciliation math is evaluated in integer minor units, and scaled via $A_{\text{scaled}} = A_{\text{minor}} \times 10^{-\text{exponent}}$ strictly at the dimensional presentation layer.
 
 #### Q8: How does the Three-Way Reconciliation logic identify "Phantom Settlements"?
-**Defense:** The reconciliation engine performs a `FULL OUTER JOIN` between internal card authorizations, external clearinghouse settlement legs, and banking ledger entries on `authorization_id`. If a settlement record exists with `auth_id IS NULL`, it is classified as `BREAK_UNMATCHED_SETTLEMENT` (a phantom settlement leg indicating potential merchant duplicate capture or clearing spoofing).
+**Architectural Rationale:** The reconciliation engine performs a `FULL OUTER JOIN` between internal card authorizations, external clearinghouse settlement legs, and banking ledger entries on `authorization_id`. If a settlement record exists with `auth_id IS NULL`, it is classified as `BREAK_UNMATCHED_SETTLEMENT` (a phantom settlement leg indicating potential merchant duplicate capture or clearing spoofing).
 
 #### Q9: Why use Kimball Star Schema in dbt instead of querying raw Delta Silver tables directly?
-**Defense:** Silver tables preserve operational transaction models (3NF/normalized), which require complex multi-table joins and high compute overhead for analytics. Kimball dimensional star schemas (`fact_reconciliation_breaks` surrounded by `dim_payment_rails`, `dim_currencies`, `dim_dates`) optimize analytical query execution, enable BI tool caching, and establish standardized metrics across audit and risk teams.
+**Architectural Rationale:** Silver tables preserve operational transaction models (3NF/normalized), which require complex multi-table joins and high compute overhead for analytics. Kimball dimensional star schemas (`fact_reconciliation_breaks` surrounded by `dim_payment_rails`, `dim_currencies`, `dim_dates`) optimize analytical query execution, enable BI tool caching, and establish standardized metrics across audit and risk teams.
 
 #### Q10: How do you mathematically guarantee double-entry balanced ledgers in dbt?
-**Defense:** We enforce a singular custom dbt test `assert_balanced_ledger.sql` that asserts:
+**Architectural Rationale:** We enforce a singular custom dbt test `assert_balanced_ledger.sql` that asserts:
 $$\sum (\text{settled\_amount\_minor} - \text{auth\_amount\_minor}) = 0$$
 for all matched transactions. If any transaction has a non-zero residual, the CI/CD build halts and isolates the partition before Gold publication.
 
@@ -205,38 +205,38 @@ for all matched transactions. If any transaction has a non-zero residual, the CI
 ### Category 3: Autonomous AI & Deterministic Lineage
 
 #### Q11: Why use SQLglot AST parsing instead of letting an LLM trace SQL column lineage?
-**Defense:** LLMs hallucinate column lineages on complex multi-table joins, CTEs, and window functions. Furthermore, passing 50 dbt models into an LLM context burns 15,000 tokens per investigation ($0.10/query). SQLglot compiles the SQL abstract syntax tree into a deterministic relational DAG, tracing column provenance in 0.02s with zero token cost and 100% mathematical reproducibility.
+**Architectural Rationale:** LLMs hallucinate column lineages on complex multi-table joins, CTEs, and window functions. Furthermore, passing 50 dbt models into an LLM context burns 15,000 tokens per investigation ($0.10/query). SQLglot compiles the SQL abstract syntax tree into a deterministic relational DAG, tracing column provenance in 0.02s with zero token cost and 100% mathematical reproducibility.
 
 #### Q12: How does LangGraph handle state persistence when an execution thread is interrupted?
-**Defense:** LangGraph couples a checkpointer (`MemorySaver` or PostgreSQL checkpointer) with state immutability patterns (`TypedDict` with reducer functions). When `interrupt()` is called, LangGraph writes a snapshot of all state values to the checkpointer and suspends execution. Resumption occurs seamlessly via `Command(resume={...})` using the `thread_id`.
+**Architectural Rationale:** LangGraph couples a checkpointer (`MemorySaver` or PostgreSQL checkpointer) with state immutability patterns (`TypedDict` with reducer functions). When `interrupt()` is called, LangGraph writes a snapshot of all state values to the checkpointer and suspends execution. Resumption occurs seamlessly via `Command(resume={...})` using the `thread_id`.
 
 #### Q13: Why is autonomous SQL execution prohibited in financial systems (SOX / DORA)?
-**Defense:** Under Sarbanes-Oxley (SOX-404) and EU DORA, automated systems are strictly forbidden from modifying books of record without human attribution, segregation of duties, and audit logging. Autonomous agents can introduce unintended financial hallucinations. AegisLake solves this by placing an interactive Human-in-the-Loop (HITL) gate before any ledger update.
+**Architectural Rationale:** Under Sarbanes-Oxley (SOX-404) and EU DORA, automated systems are strictly forbidden from modifying books of record without human attribution, segregation of duties, and audit logging. Autonomous agents can introduce unintended financial hallucinations. AegisLake solves this by placing an interactive Human-in-the-Loop (HITL) gate before any ledger update.
 
 #### Q14: How does AegisLake prevent SQL injection or destructive queries in AI remediation patches?
-**Defense:** The proposed remediation SQL patch is subjected to a two-stage sandbox: (1) An AST parser enforces read/insert only (rejecting `DROP`, `TRUNCATE`, `ALTER`). (2) The patch is dry-run executed against an isolated DuckDB quarantine clone. Only if the patch executes with 0 syntax errors and resolves the discrepancy is it surfaced to the auditor.
+**Architectural Rationale:** The proposed remediation SQL patch is subjected to a two-stage sandbox: (1) An AST parser enforces read/insert only (rejecting `DROP`, `TRUNCATE`, `ALTER`). (2) The patch is dry-run executed against an isolated DuckDB quarantine clone. Only if the patch executes with 0 syntax errors and resolves the discrepancy is it surfaced to the auditor.
 
 #### Q15: Why choose `gemini-3.5-flash-lite` over heavier models (e.g. GPT-4o or Claude 3.5 Opus) for remediation?
-**Defense:** Remediation patch generation is an in-context SQL synthesis task constrained by schema contracts. `gemini-3.5-flash-lite` provides sub-300ms time-to-first-token (TTFT) and an 80%+ reduction in inference cost compared to frontier models, while delivering 100% compilation accuracy when given the exact SQLglot AST lineage context.
+**Architectural Rationale:** Remediation patch generation is an in-context SQL synthesis task constrained by schema contracts. `gemini-3.5-flash-lite` provides sub-300ms time-to-first-token (TTFT) and an 80%+ reduction in inference cost compared to frontier models, while delivering 100% compilation accuracy when given the exact SQLglot AST lineage context.
 
 ---
 
 ### Category 4: Cloud Infrastructure & Enterprise CI/CD
 
 #### Q16: Why is `BucketOwnerEnforced` mandatory when third parties upload settlement files to S3?
-**Defense:** Historically, S3 objects uploaded by external AWS accounts (e.g. Visa or clearing banks) remained owned by the uploader. If the external party omitted the ACL header, the bucket owner could not read or decrypt the file, crashing PySpark jobs with `403 Access Denied`. `BucketOwnerEnforced` disables S3 ACLs entirely, transferring unconditional ownership to the bucket owner.
+**Architectural Rationale:** Historically, S3 objects uploaded by external AWS accounts (e.g. Visa or clearing banks) remained owned by the uploader. If the external party omitted the ACL header, the bucket owner could not read or decrypt the file, crashing PySpark jobs with `403 Access Denied`. `BucketOwnerEnforced` disables S3 ACLs entirely, transferring unconditional ownership to the bucket owner.
 
 #### Q17: Why use Customer-Managed Keys (KMS CMK) instead of default AWS-managed S3 keys?
-**Defense:** AWS-managed keys (`aws/s3`) do not support automatic key rotation policies, custom key access policies, or cross-account access delegation. Financial regulators (PCI-DSS, DORA) require customer-controlled keys with annual rotation and the ability to instantly revoke access during an active security incident.
+**Architectural Rationale:** AWS-managed keys (`aws/s3`) do not support automatic key rotation policies, custom key access policies, or cross-account access delegation. Financial regulators (PCI-DSS, DORA) require customer-controlled keys with annual rotation and the ability to instantly revoke access during an active security incident.
 
 #### Q18: What is the operational difference between Databricks Job Clusters and All-Purpose Clusters?
-**Defense:** All-Purpose Interactive Clusters are designed for ad-hoc data science exploration and charge high DBU hourly rates while sitting idle. Job Clusters are automated, single-purpose clusters spun up exclusively for scheduled workflows with discounted DBU pricing (30-50% savings), guaranteed clean memory, and zero risk of noisy-neighbor interference.
+**Architectural Rationale:** All-Purpose Interactive Clusters are designed for ad-hoc data science exploration and charge high DBU hourly rates while sitting idle. Job Clusters are automated, single-purpose clusters spun up exclusively for scheduled workflows with discounted DBU pricing (30-50% savings), guaranteed clean memory, and zero risk of noisy-neighbor interference.
 
 #### Q19: How do Databricks Asset Bundles (DAB) solve the "ClickOps" configuration drift problem?
-**Defense:** Without DABs, jobs and cluster configurations are created manually in the Databricks UI ("pets"). If a workspace is lost or cloned across regions, recreating pipelines is error-prone. DABs define the entire Lakehouse workflow as version-controlled code in Git, allowing identical multi-environment deployments via `databricks bundle deploy -t prod`.
+**Architectural Rationale:** Without DABs, jobs and cluster configurations are created manually in the Databricks UI ("pets"). If a workspace is lost or cloned across regions, recreating pipelines is error-prone. DABs define the entire Lakehouse workflow as version-controlled code in Git, allowing identical multi-environment deployments via `databricks bundle deploy -t prod`.
 
 #### Q20: How does your GitHub Actions CI/CD pipeline ensure zero broken code reaches production?
-**Defense:** The CI pipeline enforces 4 sequential gates: (1) Static analysis & linting via `ruff`. (2) 56 unit, streaming, and multi-agent tests executed under Java 17 / PySpark. (3) Full compilation and invariant checks of all dbt dimensional models. (4) Dry-run validation of Terraform IaC and Databricks DAB schemas. A single failure halts deployment immediately.
+**Architectural Rationale:** The CI pipeline enforces 4 sequential gates: (1) Static analysis & linting via `ruff`. (2) 56 unit, streaming, and multi-agent tests executed under Java 17 / PySpark. (3) Full compilation and invariant checks of all dbt dimensional models. (4) Dry-run validation of Terraform IaC and Databricks DAB schemas. A single failure halts deployment immediately.
 
 ---
 
