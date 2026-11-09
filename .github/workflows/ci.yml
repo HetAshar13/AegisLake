@@ -26,9 +26,6 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Set up Python 3.12
-        run: uv python install 3.12
-
       - name: Run Ruff Linter
         run: uvx ruff check .
 
@@ -54,17 +51,16 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Set up Python 3.12
-        run: uv python install 3.12
+      - name: Set up Python Virtual Environment
+        run: uv venv --python 3.12
 
       - name: Install Project Dependencies
-        run: uv pip install --system -r requirements.txt
+        run: uv pip install -r requirements.txt
 
       - name: Run Full Pytest Suite (Streaming, Lakehouse, dbt, Agents, IaC, DAB)
         env:
           PYTHONPATH: src
-        run: |
-          pytest -v tests/
+        run: uv run pytest -v tests/
 
   # =====================================================================
   # 3. dbt Kimball Model Compilation & Invariant Verification
@@ -82,17 +78,17 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Set up Python 3.12
-        run: uv python install 3.12
+      - name: Set up Python Virtual Environment
+        run: uv venv --python 3.12
 
       - name: Install dbt & DuckDB
-        run: uv pip install --system dbt-core dbt-duckdb duckdb
+        run: uv pip install dbt-core dbt-duckdb duckdb
 
       - name: dbt Compile & Parse Validation
         run: |
           cd aegis_dbt
-          dbt parse --profiles-dir .
-          dbt compile --profiles-dir .
+          uv run dbt parse --profiles-dir .
+          uv run dbt compile --profiles-dir .
 
   # =====================================================================
   # 4. Continuous Deployment (CD): Databricks Asset Bundle Dry-Run Deploy
