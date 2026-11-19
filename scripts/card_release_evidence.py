@@ -45,7 +45,7 @@ def scaled_fixture(case_count):
             target["unknown_merchants"].append(payment_id)
         for source, row in grouped[template]:
             scaled[source].append(dict(row, authorization_id=payment_id, event_id=f"{source}_{payment_id}"))
-    # Preserve the malformed-input rate while scaling the assessed case population separately.
+    # Preserve the malformed-input rate while scaling the case population separately.
     for item in expected["quarantine"]:
         source, malformed = next(
             (source, row) for entries in grouped.values() for source, row in entries
@@ -108,7 +108,7 @@ def run_benchmark(output, sizes, repeats):
         )
         metadata["available_memory_kib"] = int(Path("/proc/meminfo").read_text().splitlines()[0].split()[1])
     summary = ["### Card reconciliation benchmark", "",
-               "| Assessed cases | Committed Bronze events | Median seconds | Range seconds | Events/s |",
+               "| Reconciliation cases | Committed Bronze events | Median seconds | Range seconds | Events/s |",
                "| ---: | ---: | ---: | ---: | ---: |"]
     results = []
     for size in sizes:
@@ -162,13 +162,9 @@ def capture_demo(output, replay):
                 else:
                     raise TimeoutError("Streamlit health check did not respond")
                 page = browser.new_page(viewport={"width": 1280, "height": 849})
-                page.goto(url, wait_until="domcontentloaded")
+                page.goto(f"{url}/?case={CASE}" if inspect else url, wait_until="domcontentloaded")
                 page.get_by_text("Actionable breaks", exact=True).wait_for(timeout=30000)
                 if inspect:
-                    if corrected:
-                        page.get_by_text("Actionable breaks only", exact=True).click()
-                    page.get_by_role("combobox").click()
-                    page.get_by_text(CASE, exact=True).click()
                     status = "MATCHED" if corrected else "BREAK_LEDGER_AMOUNT_MISMATCH"
                     page.get_by_role("heading", name=status, exact=True).wait_for()
                     page.get_by_text("Ledger minus settlement (minor units)").scroll_into_view_if_needed()
