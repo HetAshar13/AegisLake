@@ -168,9 +168,10 @@ def capture_demo(output, replay):
                     if corrected:
                         page.get_by_text("Actionable breaks only", exact=True).click()
                     page.get_by_role("combobox").click()
-                    page.get_by_role("option", name=CASE, exact=True).click()
+                    page.get_by_text(CASE, exact=True).click()
                     status = "MATCHED" if corrected else "BREAK_LEDGER_AMOUNT_MISMATCH"
                     page.get_by_role("heading", name=status, exact=True).wait_for()
+                    page.get_by_text("Ledger minus settlement (minor units)").scroll_into_view_if_needed()
                 page.screenshot(path=str(output / f"{name}.png"), animations="disabled")
                 page.close()
             finally:
