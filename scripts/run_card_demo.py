@@ -133,7 +133,7 @@ def main():
     warehouse = directory / "aegislake.duckdb"
     project = REPO / "aegis_dbt"
     env = os.environ | {
-        "AEGIS_LAKEHOUSE": lake.as_uri(),
+        "AEGIS_LAKEHOUSE": lake.as_posix(),
         "AEGIS_WAREHOUSE": str(warehouse),
         "DBT_LOG_PATH": str(directory / "dbt_logs"),
     }

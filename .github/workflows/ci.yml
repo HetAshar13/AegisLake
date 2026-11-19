@@ -108,6 +108,11 @@ jobs:
           PYTHONPATH: src
         run: uv run python scripts/run_card_demo.py --output runs/ci --expected fixtures/card_demo_expected.json
 
+      - name: Verify checkpoint restart and late correction
+        env:
+          PYTHONPATH: src
+        run: uv run python scripts/verify_card_replay.py --output runs/ci-replay
+
       - name: Retain dbt evidence
         if: always()
         uses: actions/upload-artifact@v4

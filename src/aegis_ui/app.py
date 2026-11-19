@@ -15,15 +15,19 @@ if not warehouse.is_file():
     st.info("Build the card demo warehouse to view case assessments. See the README for the build command.")
     st.stop()
 
-with duckdb.connect(str(warehouse), read_only=True) as db:
-    cases = db.execute("""
-        select r.*, coalesce(m.merchant_name, '') as merchant_name
-        from fact_reconciliation_breaks r
-        left join fact_card_authorizations a using (authorization_id)
-        left join dim_merchants m on a.merchant_key = m.merchant_key
-        order by r.is_actionable_break desc, r.authorization_id
-    """).df()
-    quarantine = db.execute("select * from stg_quarantine order by source, event_id").df()
+try:
+    with duckdb.connect(str(warehouse), read_only=True) as db:
+        cases = db.execute("""
+            select r.*, coalesce(m.merchant_name, '') as merchant_name
+            from fact_reconciliation_breaks r
+            left join fact_card_authorizations a using (authorization_id)
+            left join dim_merchants m on a.merchant_key = m.merchant_key
+            order by r.is_actionable_break desc, r.authorization_id
+        """).df()
+        quarantine = db.execute("select * from stg_quarantine order by source, event_id").df()
+except duckdb.Error:
+    st.error("This warehouse is unavailable or its build is incomplete. Select a completed demo run.")
+    st.stop()
 
 if cases.empty:
     st.info("This run has no reconciliation cases.")
