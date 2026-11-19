@@ -108,6 +108,25 @@ jobs:
           PYTHONPATH: src
         run: uv run python scripts/run_card_demo.py --output runs/ci --expected fixtures/card_demo_expected.json
 
+      - name: Verify the Streamlit analyst view
+        env:
+          AEGIS_WAREHOUSE: runs/ci/aegislake.duckdb
+        shell: bash
+        run: |
+          uv run python - <<'PY'
+          from streamlit.testing.v1 import AppTest
+
+          app = AppTest.from_file('src/aegis_ui/app.py', default_timeout=30).run()
+          assert not app.exception, app.exception
+          metrics = {metric.label: metric.value for metric in app.metric}
+          assert metrics['Match rate among assessed cases'] == '20.0%', metrics
+          assert metrics['Actionable breaks'] == '8', metrics
+          app.selectbox[0].select('card_ledger_short').run()
+          assert not app.exception, app.exception
+          assert app.subheader[0].value == 'BREAK_LEDGER_AMOUNT_MISMATCH', app.subheader
+          assert app.dataframe[1].value.iloc[2]['Amount (minor units)'] == 9990
+          PY
+
       - name: Verify checkpoint restart and late correction
         env:
           PYTHONPATH: src
