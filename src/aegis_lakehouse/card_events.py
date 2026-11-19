@@ -51,10 +51,15 @@ def select_versions(fixture, as_of):
     """Quarantine invalid/conflicting records and return at most one source row per case."""
     current = {source: [] for source in SOURCES}
     quarantine = []
+    quarantined = set()
     for source, (time_key, _, _) in SOURCES.items():
         by_event = defaultdict(dict)
 
         def quarantine_record(row, payload, reason):
+            key = (source, payload, reason)
+            if key in quarantined:
+                return
+            quarantined.add(key)
             quarantine.append({
                 "source": source,
                 "event_id": str(row.get("event_id") or ""),
