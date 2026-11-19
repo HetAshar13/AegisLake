@@ -19,3 +19,8 @@
 - Confirmed the checked-in Delta table exposes 100 current authorizations while its physical Parquet files contain 200 rows. Added a regression test.
 - On this Windows workspace, Ruff and all 48 non-Spark pytest tests passed. GitHub Actions now defines the complete demo build and replay checks. That workflow has not run for this local branch.
 - Remaining gates are to run the Spark integration and replay workflow where Java loopback works, then measure reproducible throughput and record the release demo. The independently prepared Delta run validates the warehouse layer only.
+
+## Analyst view check
+
+- Ran the app code against the verified DuckDB warehouse with a test double for Streamlit. The overview reported 2 matched out of 10 assessed cases, 8 actionable breaks, 1 pending case and 1 quarantined record. Selecting card_ledger_short returned a ledger variance of -10 minor units.
+- The full Streamlit AppTest also needs local sockets on Windows. Its event loop stalled in socketpair setup in this workspace, so live rendering remains to be checked with the Spark run.
