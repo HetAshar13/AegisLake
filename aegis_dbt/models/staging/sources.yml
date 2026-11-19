@@ -2,14 +2,24 @@ version: 2
 
 sources:
   - name: delta_lakehouse
-    description: "PySpark Medallion Delta Lake storage layer on disk"
     tables:
       - name: silver_authorizations
-        description: "Clean Silver Card Authorizations Delta table"
-        meta:
-          external_location: "delta_scan('c:/Users/het81/Downloads/Data Project/data/lakehouse/silver_authorizations')"
-
+        config:
+          meta:
+            external_location: "delta_scan('{{ env_var('AEGIS_LAKEHOUSE', '../data/lakehouse') }}/silver_authorizations')"
       - name: silver_reconciliation_breaks
-        description: "Three-way financial reconciliation breaks Delta table"
-        meta:
-          external_location: "delta_scan('c:/Users/het81/Downloads/Data Project/data/lakehouse/silver_reconciliation_breaks')"
+        config:
+          meta:
+            external_location: "delta_scan('{{ env_var('AEGIS_LAKEHOUSE', '../data/lakehouse') }}/silver_reconciliation_breaks')"
+      - name: quarantine
+        config:
+          meta:
+            external_location: "delta_scan('{{ env_var('AEGIS_LAKEHOUSE', '../data/lakehouse') }}/quarantine')"
+      - name: customers
+        config:
+          meta:
+            external_location: "delta_scan('{{ env_var('AEGIS_LAKEHOUSE', '../data/lakehouse') }}/customers')"
+      - name: merchants
+        config:
+          meta:
+            external_location: "delta_scan('{{ env_var('AEGIS_LAKEHOUSE', '../data/lakehouse') }}/merchants')"
