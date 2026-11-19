@@ -4,6 +4,8 @@ A local lakehouse for synthetic card-payment reconciliation. Follow a card payme
 
 [CI checks](https://github.com/HetAshar13/AegisLake/actions/workflows/ci.yml) · [Payment contract](docs/card-reconciliation.md) · [Execution checkpoints](EXECUTION_STATE.md)
 
+[Download the 90-second walkthrough](https://github.com/HetAshar13/AegisLake/actions/runs/44543678552/artifacts/14539656273) (GitHub sign-in required for the Actions artifact).
+
 ## Follow one payment
 
 `card_ledger_short` has a EUR 100.00 authorization and settlement, but the ledger initially posts EUR 99.90. The original build reports a ledger variance of −10 minor units. Redelivering identical source events leaves the assessment unchanged. A higher-version ledger event corrects the variance to zero and moves just this case to `MATCHED`. Each run keeps a separate warehouse so you can inspect the before and after results.
@@ -19,7 +21,7 @@ python scripts/run_card_demo.py --output runs/card-demo --expected fixtures/card
 streamlit run src/aegis_ui/app.py
 ```
 
-In PowerShell, use `$env:PYTHONPATH = "src"` in place of `export`. In Streamlit, select `card_ledger_short` in the case queue. The denominator tab shows which cases contributed to the match rate.
+In PowerShell, use `$env:PYTHONPATH = "src"` in place of `export`. In Streamlit, select `card_ledger_short` in the case queue or append `?case=card_ledger_short` to the Streamlit URL. The denominator tab shows which cases contributed to the match rate.
 
 To reproduce the original delivery, identical redelivery, and ledger correction, run `python scripts/verify_card_replay.py --output runs/card-replay`. The verifier checks that just one case changes and that the original assessments remain inspectable. Use a fresh output directory for each build. Set `AEGIS_WAREHOUSE` to a run’s `aegislake.duckdb` to open that run in Streamlit.
 
@@ -32,7 +34,7 @@ To reproduce the original delivery, identical redelivery, and ledger correction,
 
 ## Measured batch performance
 
-| Synthetic assessed cases | Committed Bronze envelopes | Median wall time | Min–max |
+| Synthetic reconciliation cases | Committed Bronze envelopes | Median wall time | Min–max |
 | ---: | ---: | ---: | ---: |
 | 1,000 | 2,455 | 19.18 s | 19.08–20.80 s |
 | 10,000 | 24,548 | 21.07 s | 20.73–21.34 s |
