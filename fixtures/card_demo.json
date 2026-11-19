@@ -1,0 +1,300 @@
+{
+  "as_of": "2026-11-07T12:00:00Z",
+  "settlement_grace_minutes": 60,
+  "customers": [
+    {
+      "customer_id": "cust_demo",
+      "customer_name": "Demo Customer",
+      "kyc_tier": "TIER_2_STANDARD",
+      "risk_score": 20,
+      "valid_from": "2020-01-01T00:00:00Z"
+    }
+  ],
+  "merchants": [
+    {
+      "merchant_id": "merchant_demo",
+      "merchant_name": "Demo Grocery",
+      "mcc": "5411",
+      "country_code": "IT"
+    }
+  ],
+  "authorizations": [
+    {
+      "authorization_id": "card_clean",
+      "event_version": 1,
+      "event_id": "auth_card_clean",
+      "authorized_at": "2026-11-07T08:00:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_ledger_short",
+      "event_version": 1,
+      "event_id": "auth_card_ledger_short",
+      "authorized_at": "2026-11-07T08:05:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_ledger_missing",
+      "event_version": 1,
+      "event_id": "auth_card_ledger_missing",
+      "authorized_at": "2026-11-07T08:10:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_pending",
+      "event_version": 1,
+      "event_id": "auth_card_pending",
+      "authorized_at": "2026-11-07T11:45:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_overdue",
+      "event_version": 1,
+      "event_id": "auth_card_overdue",
+      "authorized_at": "2026-11-07T08:25:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_currency",
+      "event_version": 1,
+      "event_id": "auth_card_currency",
+      "authorized_at": "2026-11-07T08:30:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_direction",
+      "event_version": 1,
+      "event_id": "auth_card_direction",
+      "authorized_at": "2026-11-07T08:35:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_unknown_merchant",
+      "event_version": 1,
+      "event_id": "auth_card_unknown_merchant",
+      "authorized_at": "2026-11-07T08:40:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_unregistered",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_malformed",
+      "event_version": 1,
+      "event_id": "auth_card_malformed",
+      "authorized_at": "2026-11-07T08:45:00Z",
+      "amount_minor": "wrong",
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    },
+    {
+      "authorization_id": "card_amount_difference",
+      "event_version": 1,
+      "event_id": "auth_card_amount_difference",
+      "authorized_at": "2026-11-07T08:50:00Z",
+      "amount_minor": 10000,
+      "currency": "EUR",
+      "customer_id": "cust_demo",
+      "merchant_id": "merchant_demo",
+      "merchant_mcc": "5411",
+      "status": "AUTHORIZED"
+    }
+  ],
+  "settlements": [
+    {
+      "authorization_id": "card_clean",
+      "event_version": 1,
+      "event_id": "settle_card_clean",
+      "settled_at": "2026-11-07T08:00:00Z",
+      "settled_amount_minor": 10000,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    },
+    {
+      "authorization_id": "card_ledger_short",
+      "event_version": 1,
+      "event_id": "settle_card_ledger_short",
+      "settled_at": "2026-11-07T08:05:00Z",
+      "settled_amount_minor": 10000,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    },
+    {
+      "authorization_id": "card_ledger_missing",
+      "event_version": 1,
+      "event_id": "settle_card_ledger_missing",
+      "settled_at": "2026-11-07T08:10:00Z",
+      "settled_amount_minor": 10000,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    },
+    {
+      "authorization_id": "card_currency",
+      "event_version": 1,
+      "event_id": "settle_card_currency",
+      "settled_at": "2026-11-07T08:30:00Z",
+      "settled_amount_minor": 10000,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    },
+    {
+      "authorization_id": "card_direction",
+      "event_version": 1,
+      "event_id": "settle_card_direction",
+      "settled_at": "2026-11-07T08:35:00Z",
+      "settled_amount_minor": 10000,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    },
+    {
+      "authorization_id": "card_unknown_merchant",
+      "event_version": 1,
+      "event_id": "settle_card_unknown_merchant",
+      "settled_at": "2026-11-07T08:40:00Z",
+      "settled_amount_minor": 10000,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    },
+    {
+      "authorization_id": "card_amount_difference",
+      "event_version": 1,
+      "event_id": "settle_card_amount_difference",
+      "settled_at": "2026-11-07T08:50:00Z",
+      "settled_amount_minor": 9750,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    },
+    {
+      "authorization_id": "card_settlement_only",
+      "event_version": 1,
+      "event_id": "settle_card_settlement_only",
+      "settled_at": "2026-11-07T08:55:00Z",
+      "settled_amount_minor": 10000,
+      "settled_currency": "EUR",
+      "fee_minor": 25
+    }
+  ],
+  "ledger": [
+    {
+      "authorization_id": "card_clean",
+      "event_version": 1,
+      "event_id": "ledger_card_clean",
+      "posted_at": "2026-11-07T08:00:00Z",
+      "ledger_amount_minor": 10000,
+      "currency": "EUR",
+      "entry_type": "DEBIT"
+    },
+    {
+      "authorization_id": "card_ledger_short",
+      "event_version": 1,
+      "event_id": "ledger_card_ledger_short",
+      "posted_at": "2026-11-07T08:05:00Z",
+      "ledger_amount_minor": 9990,
+      "currency": "EUR",
+      "entry_type": "DEBIT"
+    },
+    {
+      "authorization_id": "card_ledger_only",
+      "event_version": 1,
+      "event_id": "ledger_card_ledger_only",
+      "posted_at": "2026-11-07T08:15:00Z",
+      "ledger_amount_minor": 10000,
+      "currency": "EUR",
+      "entry_type": "DEBIT"
+    },
+    {
+      "authorization_id": "card_currency",
+      "event_version": 1,
+      "event_id": "ledger_card_currency",
+      "posted_at": "2026-11-07T08:30:00Z",
+      "ledger_amount_minor": 10000,
+      "currency": "USD",
+      "entry_type": "DEBIT"
+    },
+    {
+      "authorization_id": "card_direction",
+      "event_version": 1,
+      "event_id": "ledger_card_direction",
+      "posted_at": "2026-11-07T08:35:00Z",
+      "ledger_amount_minor": 10000,
+      "currency": "EUR",
+      "entry_type": "CREDIT"
+    },
+    {
+      "authorization_id": "card_unknown_merchant",
+      "event_version": 1,
+      "event_id": "ledger_card_unknown_merchant",
+      "posted_at": "2026-11-07T08:40:00Z",
+      "ledger_amount_minor": 10000,
+      "currency": "EUR",
+      "entry_type": "DEBIT"
+    },
+    {
+      "authorization_id": "card_amount_difference",
+      "event_version": 1,
+      "event_id": "ledger_card_amount_difference",
+      "posted_at": "2026-11-07T08:50:00Z",
+      "ledger_amount_minor": 9750,
+      "currency": "EUR",
+      "entry_type": "DEBIT"
+    },
+    {
+      "authorization_id": "card_settlement_only",
+      "event_version": 1,
+      "event_id": "ledger_card_settlement_only",
+      "posted_at": "2026-11-07T08:55:00Z",
+      "ledger_amount_minor": 10000,
+      "currency": "EUR",
+      "entry_type": "DEBIT"
+    },
+    {
+      "authorization_id": "card_clean",
+      "event_version": 1,
+      "event_id": "ledger_card_clean",
+      "posted_at": "2026-11-07T08:00:00Z",
+      "ledger_amount_minor": 10000,
+      "currency": "EUR",
+      "entry_type": "DEBIT"
+    }
+  ]
+}
