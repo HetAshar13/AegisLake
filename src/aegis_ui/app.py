@@ -48,11 +48,15 @@ cards[3].metric("Quarantined records", len(quarantine))
 queue, scope, rejected = st.tabs(["Case queue", "Match rate denominator", "Quarantine"])
 columns = ["authorization_id", "reconciliation_status", "merchant_name", "currency", "ledger_discrepancy_minor"]
 with queue:
-    filter_breaks = st.toggle("Actionable breaks only", value=True)
+    requested_case = st.query_params.get("case")
+    linked_case = cases["authorization_id"].eq(requested_case)
+    filter_breaks = st.toggle("Actionable breaks only", value=not bool((linked_case & ~actionable).any()))
     filtered = cases[actionable] if filter_breaks else cases
     st.dataframe(filtered[columns], hide_index=True)
     if len(filtered):
-        selected = st.selectbox("Inspect a case", filtered["authorization_id"].tolist())
+        case_ids = filtered["authorization_id"].tolist()
+        index = case_ids.index(requested_case) if requested_case in case_ids else 0
+        selected = st.selectbox("Inspect a case", case_ids, index=index)
         case = filtered.loc[filtered["authorization_id"].eq(selected)].iloc[0]
         st.subheader(case["reconciliation_status"])
         if case["merchant_id"] is not None and not case["merchant_name"]:
