@@ -22,8 +22,7 @@ CASE = "card_ledger_short"
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2) + "
-", encoding="utf-8")
+    path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
 def scaled_fixture(case_count):
@@ -122,9 +121,7 @@ def run_benchmark(output, sizes, repeats):
         summary.append(f"| {size:,} | {event_counts[size]:,} | {middle:.2f} | "
                        f"{min(seconds):.2f}–{max(seconds):.2f} | {rate:.1f} |")
     write_json(output / "benchmark.json", {"environment": metadata, "results": results})
-    text = "
-".join(summary) + "
-"
+    text = "\n".join(summary) + "\n"
     (output / "benchmark.md").write_text(text, encoding="utf-8")
     print(text, flush=True)
     if os.environ.get("GITHUB_STEP_SUMMARY"):
@@ -199,11 +196,8 @@ def capture_demo(output, replay):
         draw.text((28, 913), caption, font=ImageFont.truetype(str(font), 22), fill="#d4e3f9")
         frame = f"scene-{index}.png"
         canvas.save(output / frame)
-        frames.append(f"file '{frame}'
-duration {seconds}
-")
-    captions.write_text("".join(frames) + "file 'scene-3.png'
-", encoding="utf-8")
+        frames.append(f"file '{frame}'\nduration {seconds}\n")
+    captions.write_text("".join(frames) + "file 'scene-3.png'\n", encoding="utf-8")
     subprocess.run([
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "concat", "-safe", "0",
         "-i", "timeline.txt", "-t", "90", "-r", "24", "-c:v", "libx264", "-pix_fmt",
