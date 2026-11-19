@@ -4,7 +4,7 @@ A local lakehouse for synthetic card-payment reconciliation. Follow a card payme
 
 [CI checks](https://github.com/HetAshar13/AegisLake/actions/workflows/ci.yml) · [Payment contract](docs/card-reconciliation.md) · [Execution checkpoints](EXECUTION_STATE.md)
 
-[Download the 90-second walkthrough](https://github.com/HetAshar13/AegisLake/actions/runs/44543678552/artifacts/14539656273) (GitHub sign-in required for the Actions artifact).
+[Download the 90-second walkthrough](https://github.com/HetAshar13/AegisLake/releases/download/v0.1.0/aegislake-replay.mp4) · [Release evidence](https://github.com/HetAshar13/AegisLake/actions/runs/44543678552)
 
 ## Follow one payment
 
