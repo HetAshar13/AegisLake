@@ -1,0 +1,68 @@
+name: Publish AegisLake v0.1.0
+
+'on':
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-release.yml]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: aegislake-v0-1-0-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: v0.1.0
+      DEMO_RUN: '44543678552'
+      BENCHMARK_RUN: '44449326062'
+      DEMO_COMMIT: 85ffe51d0d1ff730d7b4166cb7312a9b4c6b14cb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Publish the verified demo and benchmark
+        shell: bash
+        run: |
+          if gh release view "$TAG" --json tagName >/dev/null 2>&1; then
+            exit 0
+          fi
+
+          git merge-base --is-ancestor "$DEMO_COMMIT" "$GITHUB_SHA"
+          git diff --exit-code "$DEMO_COMMIT" "$GITHUB_SHA" -- scripts/card_release_evidence.py src/aegis_ui/app.py
+          evidence="$RUNNER_TEMP/aegislake-release"
+          gh run download "$DEMO_RUN" --name aegislake-demo --dir "$evidence/demo"
+          gh run download "$BENCHMARK_RUN" --name aegislake-benchmark --dir "$evidence/benchmark"
+          test -s "$evidence/demo/aegislake-replay.mp4"
+          test -s "$evidence/benchmark/benchmark.json"
+
+          cat > "$evidence/notes.md" <<'NOTES'
+          AegisLake reconciles synthetic card authorizations, settlements and ledger entries using Spark, Delta Lake, dbt and DuckDB.
+
+          The 90-second Streamlit walkthrough follows a €0.10 ledger mismatch. Redelivery preserves the initial assessment. A versioned correction resolves the case and leaves both warehouse snapshots available for inspection.
+
+          The batch benchmark committed 245,455 Bronze envelopes for 100,000 synthetic reconciliation cases in a median of 30.29 seconds across three trials on GitHub-hosted Linux. This timing includes the Gold build and correctness checks.
+
+          - [Run the demo locally](https://github.com/HetAshar13/AegisLake/blob/v0.1.0/README.md)
+          - [Recording pipeline](https://github.com/HetAshar13/AegisLake/actions/runs/44543678552)
+          - [Benchmark pipeline](https://github.com/HetAshar13/AegisLake/actions/runs/44449326062)
+          NOTES
+
+          gh release create "$TAG" \
+            "$evidence/demo/aegislake-replay.mp4#90-second Streamlit walkthrough" \
+            "$evidence/benchmark/benchmark.json#Raw benchmark results" \
+            "$evidence/benchmark/benchmark.md#Benchmark summary" \
+            --target "$GITHUB_SHA" \
+            --title "AegisLake v0.1.0 · Card reconciliation" \
+            --notes-file "$evidence/notes.md"

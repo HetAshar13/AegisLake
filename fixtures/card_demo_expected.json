@@ -1,0 +1,68 @@
+{
+  "cases": {
+    "card_clean": {
+      "status": "MATCHED",
+      "settlement_delta": 0,
+      "ledger_delta": 0
+    },
+    "card_ledger_short": {
+      "status": "BREAK_LEDGER_AMOUNT_MISMATCH",
+      "settlement_delta": 0,
+      "ledger_delta": -10
+    },
+    "card_ledger_missing": {
+      "status": "BREAK_MISSING_LEDGER",
+      "settlement_delta": 0,
+      "ledger_delta": null
+    },
+    "card_ledger_only": {
+      "status": "BREAK_ORPHAN_LEDGER",
+      "settlement_delta": null,
+      "ledger_delta": null
+    },
+    "card_pending": {
+      "status": "PENDING",
+      "settlement_delta": null,
+      "ledger_delta": null
+    },
+    "card_overdue": {
+      "status": "BREAK_UNMATCHED_AUTHORIZATION",
+      "settlement_delta": null,
+      "ledger_delta": null
+    },
+    "card_currency": {
+      "status": "BREAK_LEDGER_CURRENCY_MISMATCH",
+      "settlement_delta": 0,
+      "ledger_delta": null
+    },
+    "card_direction": {
+      "status": "BREAK_LEDGER_DIRECTION",
+      "settlement_delta": 0,
+      "ledger_delta": 0
+    },
+    "card_unknown_merchant": {
+      "status": "MATCHED",
+      "settlement_delta": 0,
+      "ledger_delta": 0
+    },
+    "card_amount_difference": {
+      "status": "BREAK_AMOUNT_MISMATCH",
+      "settlement_delta": -250,
+      "ledger_delta": 0
+    },
+    "card_settlement_only": {
+      "status": "BREAK_UNMATCHED_SETTLEMENT",
+      "settlement_delta": null,
+      "ledger_delta": 0
+    }
+  },
+  "quarantine": [
+    {
+      "event_id": "auth_card_malformed",
+      "reason": "INVALID_AMOUNT"
+    }
+  ],
+  "unknown_merchants": [
+    "card_unknown_merchant"
+  ]
+}

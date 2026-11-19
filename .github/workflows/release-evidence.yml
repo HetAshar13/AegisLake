@@ -1,0 +1,61 @@
+name: AegisLake Release Evidence
+
+'on':
+  push:
+    branches: [reconciliation-release]
+    paths:
+      - scripts/card_release_evidence.py
+      - .github/workflows/release-evidence.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [benchmark, demo]
+    runs-on: ${{ matrix.mode == 'demo' && 'ubuntu-24.04' || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: src
+      AEGIS_DISABLE_LIVE_LLM: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install the pinned stack
+        run: |
+          uv venv --python 3.12
+          uv pip install -r requirements.txt
+      - name: Benchmark the full build
+        if: matrix.mode == 'benchmark'
+        run: uv run python scripts/card_release_evidence.py benchmark --output runs/evidence
+      - name: Capture the replay walkthrough
+        if: matrix.mode == 'demo'
+        run: |
+          uv pip install playwright==1.59.0
+          uv run playwright install --with-deps chromium
+          command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+          uv run python scripts/verify_card_replay.py --output runs/release-replay
+          uv run python scripts/card_release_evidence.py demo --output runs/evidence --replay runs/release-replay
+          ffprobe -v error -show_entries format=duration,format_name -of default=noprint_wrappers=1 runs/evidence/aegislake-replay.mp4
+      - name: Retain release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: aegislake-${{ matrix.mode }}
+          if-no-files-found: error
+          path: |
+            runs/evidence/benchmark.json
+            runs/evidence/benchmark.md
+            runs/evidence/aegislake-replay.mp4
+            runs/evidence/overview.png
+            runs/evidence/break.png
+            runs/evidence/correction.png

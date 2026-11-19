@@ -3,7 +3,7 @@ aegis_dbt:
   outputs:
     dev:
       type: duckdb
-      path: 'aegislake_warehouse.duckdb'
+      path: "{{ env_var('AEGIS_WAREHOUSE', 'aegislake_warehouse.duckdb') }}"
       threads: 4
       extensions:
         - delta
