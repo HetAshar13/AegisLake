@@ -1,0 +1,7 @@
+name: aegis_sql_repair
+version: "1.0.0"
+config-version: 2
+profile: aegis_sql_repair
+models:
+  aegis_sql_repair:
+    +materialized: table

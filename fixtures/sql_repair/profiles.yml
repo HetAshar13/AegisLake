@@ -1,0 +1,8 @@
+aegis_sql_repair:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: demo.duckdb
+      schema: main
+      threads: 1

@@ -1,6 +1,6 @@
 # AegisLake
 
-AegisLake investigates two kinds of payment breaks. A missing or incorrect source record can be corrected by replaying a newer event. A suspicious calculation needs a different response: trace the SQL, draft a change, and let a human review it.
+AegisLake investigates two kinds of payment breaks. Replay a newer event when a source record is wrong. When the error is in a transformation, trace the compiled SQL and rebuild a disposable model after human review.
 
 [CI checks](https://github.com/HetAshar13/AegisLake/actions/workflows/ci.yml) · [Payment contract](docs/card-reconciliation.md) · [Execution checkpoints](EXECUTION_STATE.md)
 
@@ -18,9 +18,13 @@ Spark uses integer cents and selects the current version of each source record. 
 
 ## The SQL calculation looks wrong
 
+In the [runnable repair demo](docs/sql-repair.md), a dbt model multiplies an amount that is already in cents by 100. A €100 payment becomes €10,000. SQLglot traces the bad calculation through the compiled model. A shadow build checks the proposed change against two synthetic rows. Approval rebuilds the demo model and stores the decision and verified result in a local SQLite receipt. Rejection closes the review. The proposal comes from a deterministic rule for this fixture.
+
+### Incident graph prototype
+
 The incident prototype investigates a scaling expression in a sample SQL query. SQLglot parses the query and traces the output column `discrepancy_amount_scaled` through `raw_amount * 100` to `stg_silver_authorizations.raw_amount`. The graph passes the example table, column, expression and break payload to a patch generator. Gemini and Hugging Face are optional. The offline fallback supplies a placeholder proposal.
 
-LangGraph pauses at the review step. Approval records the reviewer and a signoff ID in the graph’s in-memory state. Rejection ends the workflow. This prototype uses sample SQL and leaves warehouse data unchanged. The [architecture notes](ARCHITECTURE.md#sql-incident-prototype) explain the checks and their scope. The [graph tests](tests/test_agents.py) exercise both decisions.
+LangGraph pauses at the review step. Approval records the reviewer and a signoff ID in the graph’s in-memory state. Rejection ends the workflow. The [architecture notes](ARCHITECTURE.md#sql-incident-prototype) explain the prototype and its scope. The [graph tests](tests/test_agents.py) exercise both decisions.
 
 ## Run it locally
 
