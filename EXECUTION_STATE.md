@@ -15,7 +15,7 @@
 
 - Reused one Bronze checkpoint across original delivery, identical redelivery, and a delayed ledger correction. The first two assessments match. The higher-version posting resolves exactly one discrepancy from −10 to 0 minor units, and the earlier warehouse remains available.
 - The analyst view exposes each match-rate denominator, raw source event IDs, and quarantined input. The initial synthetic demo has 2 matched out of 10 assessed, 8 actionable breaks, 1 pending case, and 1 quarantined input.
-- [Release evidence](https://github.com/HetAshar13/AegisLake/actions/runs/44543678552) replayed the scenario, opened both snapshots in Chromium, generated a 90-second MP4, and repeated the benchmark.
+- The release checks replayed the scenario, opened both snapshots in Chromium and repeated the benchmark.
 
 ## Benchmark and release
 
