@@ -1,14 +1,28 @@
 # AegisLake
 
-A local lakehouse for synthetic card-payment reconciliation. Follow a card payment across authorization, settlement, and ledger records, investigate a discrepancy, and replay a versioned correction against a persistent checkpoint.
+AegisLake investigates two kinds of payment breaks. A missing or incorrect source record can be corrected by replaying a newer event. A suspicious calculation needs a different response: trace the SQL, draft a change, and let a human review it.
 
 [CI checks](https://github.com/HetAshar13/AegisLake/actions/workflows/ci.yml) · [Payment contract](docs/card-reconciliation.md) · [Execution checkpoints](EXECUTION_STATE.md)
 
 [Download the 90-second walkthrough](https://github.com/HetAshar13/AegisLake/releases/download/v0.1.0/aegislake-replay.mp4) · [Release evidence](https://github.com/HetAshar13/AegisLake/actions/runs/44543678552)
 
-## Follow one payment
+## The ledger is ten cents short
 
-`card_ledger_short` has a EUR 100.00 authorization and settlement, but the ledger initially posts EUR 99.90. The original build reports a ledger variance of −10 minor units. Redelivering identical source events leaves the assessment unchanged. A higher-version ledger event corrects the variance to zero and moves just this case to `MATCHED`. Each run keeps a separate warehouse so you can inspect the before and after results.
+In the synthetic case `card_ledger_short`, both the authorization and settlement are €100.00. The ledger is the record that disagrees.
+
+| Delivery | Ledger posting | Difference from settlement | Case status |
+| --- | ---: | ---: | --- |
+| Original | €99.90 | −10 cents | `BREAK_LEDGER_AMOUNT_MISMATCH` |
+| Same events redelivered | €99.90 | −10 cents | `BREAK_LEDGER_AMOUNT_MISMATCH` |
+| Higher-version ledger event | €100.00 | 0 cents | `MATCHED` |
+
+Spark uses integer cents and selects the current version of each source record. The [replay verifier](scripts/verify_card_replay.py) restarts from a persistent file-stream checkpoint, checks that the duplicate changes nothing, and checks that the correction changes exactly one case. Each assessment has its own warehouse, so the original result remains inspectable.
+
+## The SQL calculation looks wrong
+
+The incident prototype investigates a scaling expression in a sample SQL query. SQLglot parses the query and traces the output column `discrepancy_amount_scaled` through `raw_amount * 100` to `stg_silver_authorizations.raw_amount`. The graph passes the example table, column, expression and break payload to a patch generator. Gemini and Hugging Face are optional. The offline fallback supplies a placeholder proposal.
+
+LangGraph pauses at the review step. Approval records the reviewer and a signoff ID in the graph’s in-memory state. Rejection ends the workflow. This prototype uses sample SQL and leaves warehouse data unchanged. The [architecture notes](ARCHITECTURE.md#sql-incident-prototype) explain the checks and their scope. The [graph tests](tests/test_agents.py) exercise both decisions.
 
 ## Run it locally
 
@@ -44,4 +58,4 @@ Three measured batches per size on one GitHub-hosted Linux runner, after a warm-
 
 [Benchmark job and logs](https://github.com/HetAshar13/AegisLake/actions/runs/44449326062) · [Benchmark JSON and Markdown](https://github.com/HetAshar13/AegisLake/actions/runs/44449326062/artifacts/14494249023) · [Benchmark and recording runner](scripts/card_release_evidence.py)
 
-The public demo covers synthetic, single-capture gross settlements. The [payment contract](docs/card-reconciliation.md) explains the posting convention, timing, and event versions. Broker, cloud, and LangGraph integrations are experimental.
+The replay covers synthetic, single-capture gross settlements. The [payment contract](docs/card-reconciliation.md) explains the posting convention, timing and event versions. Broker and cloud integrations are experimental.
