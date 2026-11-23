@@ -5,7 +5,7 @@
 ```mermaid
 flowchart TD
     A["Authorization, settlement and ledger events"] --> B["Bronze Delta source deliveries"]
-    B --> C["Spark selects current versions and assesses each case"]
+    B --> C["Select versions on the driver and reconcile with Spark"]
     C --> D["Silver Delta assessments and input quarantine"]
     D --> E["dbt builds Gold tables in DuckDB"]
     E --> F["Streamlit case queue"]
