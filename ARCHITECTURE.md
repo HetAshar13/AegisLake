@@ -36,4 +36,4 @@ SQLglot follows column references in the [query supplied by the graph](src/aegis
 
 The forensic lookup reads DuckDB. Quarantine and dry-run success in this incident graph are prototype state fields. A real quarantine table is built by the separate payment pipeline for malformed inputs. The [fallback proposal](src/aegis_agent/tools/llm_remediation.py) multiplies by one, so it demonstrates the review flow without correcting a value. The approval branch ends after recording a decision with LangGraph's in-memory checkpointer.
 
-The [earlier Streamlit prototype](https://github.com/HetAshar13/AegisLake/blob/597711f2bf476c85ad85ceb2f9edcf00f68a9744/src/aegis_ui/app.py#L424) showed the draft and the approval buttons. The [release walkthrough](https://github.com/HetAshar13/AegisLake/releases/tag/v0.1.0) demonstrates the payment replay.
+The [earlier Streamlit prototype](https://github.com/HetAshar13/AegisLake/blob/597711f2bf476c85ad85ceb2f9edcf00f68a9744/src/aegis_ui/app.py#L424) showed the draft and the approval buttons.

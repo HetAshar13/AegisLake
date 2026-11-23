@@ -4,8 +4,6 @@ AegisLake investigates two kinds of payment breaks. A missing or incorrect sourc
 
 [CI checks](https://github.com/HetAshar13/AegisLake/actions/workflows/ci.yml) · [Payment contract](docs/card-reconciliation.md) · [Execution checkpoints](EXECUTION_STATE.md)
 
-[Download the 90-second walkthrough](https://github.com/HetAshar13/AegisLake/releases/download/v0.1.0/aegislake-replay.mp4) · [Release evidence](https://github.com/HetAshar13/AegisLake/actions/runs/44543678552)
-
 ## The ledger is ten cents short
 
 In the synthetic case `card_ledger_short`, both the authorization and settlement are €100.00. The ledger is the record that disagrees.
